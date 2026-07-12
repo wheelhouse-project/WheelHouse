@@ -611,13 +611,22 @@ def _uia_module() -> Any:
     """Return comtypes' generated UIAutomationClient module.
 
     Imported lazily so pure-logic tests need neither comtypes type-library
-    generation nor a Windows desktop. The ``uiautomation`` package (already
-    vendored) triggers generation of ``comtypes.gen.UIAutomationClient`` on
-    first use; importing it here guarantees the module exists before we
-    read it.
+    generation nor a Windows desktop. On a machine where the module has
+    never been generated (a fresh venv: CI, or an end user's first "click"
+    before anything else touched UI Automation), importing the
+    ``uiautomation`` package is NOT enough -- its COM client is a lazy
+    singleton created on first API use, so the import has no generation
+    side effect. Generate explicitly instead; the fallback runs once per
+    venv ever, and the happy path stays a cached import
+    (wh-uia-gen-fresh-venv).
     """
-    import uiautomation  # noqa: F401 -- triggers comtypes gen as a side effect
-    from comtypes.gen import UIAutomationClient as uia_mod
+    try:
+        from comtypes.gen import UIAutomationClient as uia_mod
+    except ImportError:
+        import comtypes.client
+
+        comtypes.client.GetModule("UIAutomationCore.dll")
+        from comtypes.gen import UIAutomationClient as uia_mod
 
     return uia_mod
 

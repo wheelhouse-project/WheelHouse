@@ -11,6 +11,7 @@ The script:
 3. Prints failures with test names and error messages
 4. Returns pytest's exit code
 """
+import shutil
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -90,6 +91,17 @@ def main():
     if not (service_dir / "pyproject.toml").exists():
         print(f"[!] Service '{service}' not found at {service_dir}")
         sys.exit(1)
+
+    # Fresh checkout: config.toml is per-machine and untracked (the installer
+    # and CONTRIBUTING.md both create it from the example). Some test modules
+    # import application modules that read it at import time, so provision it
+    # here the same way before pytest starts.
+    example = service_dir / "config.toml.example"
+    config = service_dir / "config.toml"
+    if example.exists() and not config.exists():
+        shutil.copyfile(example, config)
+        print(f"[+] Created {config} from config.toml.example (fresh checkout)",
+              flush=True)
 
     xml_path = service_dir / "test-results.xml"
 

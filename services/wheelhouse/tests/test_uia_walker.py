@@ -1612,3 +1612,49 @@ def test_walk_window_retry_respects_deadline():
     assert result.deadline_truncated is True
     assert result.matches == []
     assert top_level.find_all_build_cache_calls == 1
+
+
+# ---------------------------------------------------------------------------
+# _uia_module on a fresh venv (no generated comtypes.gen.UIAutomationClient).
+# ---------------------------------------------------------------------------
+
+
+def test_uia_module_generates_gen_module_when_missing(monkeypatch):
+    """A fresh venv (CI, or an end user's first install) has never generated
+    ``comtypes.gen.UIAutomationClient``. ``_uia_module`` must trigger the
+    comtypes type-library generation itself: importing the ``uiautomation``
+    package does NOT generate it (its COM client is a lazy singleton created
+    on first API use, precisely so that import has no COM side effects).
+
+    Regression for the 1.0.0 CI run, where 12 tests failed with
+    ``ImportError: cannot import name 'UIAutomationClient' from
+    'comtypes.gen'`` -- and for a fresh end-user install, where a "click X"
+    spoken before anything else touched UI Automation would fail the same
+    way (wh-uia-gen-fresh-venv).
+    """
+    import sys
+    import types
+
+    import comtypes.client
+    import comtypes.gen
+
+    fake_gen_mod = types.ModuleType("comtypes.gen.UIAutomationClient")
+    calls = []
+
+    def fake_get_module(name):
+        calls.append(name)
+        sys.modules["comtypes.gen.UIAutomationClient"] = fake_gen_mod
+        setattr(comtypes.gen, "UIAutomationClient", fake_gen_mod)
+        return fake_gen_mod
+
+    # Simulate the fresh venv: no generated module in sys.modules, no
+    # attribute on the gen package, and nothing importable from the gen
+    # directory on disk.
+    monkeypatch.delitem(
+        sys.modules, "comtypes.gen.UIAutomationClient", raising=False)
+    monkeypatch.delattr(comtypes.gen, "UIAutomationClient", raising=False)
+    monkeypatch.setattr(comtypes.gen, "__path__", [])
+    monkeypatch.setattr(comtypes.client, "GetModule", fake_get_module)
+
+    assert uia_walker._uia_module() is fake_gen_mod
+    assert calls == ["UIAutomationCore.dll"]
