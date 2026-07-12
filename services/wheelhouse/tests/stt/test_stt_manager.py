@@ -276,10 +276,18 @@ class TestSTTManagerCapabilities:
         with patch.object(
             manager, "_create_provider", return_value=mock_provider
         ):
+            # Patch the CLASS in the manager's namespace (the pattern the
+            # rest of this file uses): start() constructs a fresh
+            # AudioCapture, so patching the instance attribute leaves the
+            # real one in place -- which opens a real microphone stream on
+            # a dev machine and dies on a headless CI runner with
+            # "Error querying device -1".
             mock_audio = MagicMock()
             mock_audio.start = AsyncMock()
             mock_audio.stop = AsyncMock()
-            with patch.object(manager, "audio_capture", mock_audio):
+            with patch(
+                "stt.stt_manager.AudioCapture", return_value=mock_audio
+            ):
                 await manager.start("google")
 
                 caps = manager.get_capabilities()
