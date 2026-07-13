@@ -29,7 +29,7 @@ Behavior rules:
 
 ## What Is WheelHouse
 
-WheelHouse is a voice-controlled desktop automation system for Windows. You speak, and your PC responds -- issue commands, dictate text, switch between applications, adjust volume, control screen brightness, all without touching the keyboard or mouse.
+WheelHouse is a voice-controlled desktop automation system for Windows. You speak, and your PC responds -- issue commands, dictate text, and switch between applications, all without touching the keyboard or mouse. (Volume and screen brightness are adjusted with the mouse thumb wheel, in dedicated zones at the edges of the screen, rather than by voice.)
 
 **Who is it for?** Anyone who wants hands-free control of their computer: people with mobility or RSI concerns, programmers who'd rather talk than type, and anyone curious about a faster, more natural way to interact with Windows.
 
@@ -38,7 +38,7 @@ WheelHouse is a voice-controlled desktop automation system for Windows. You spea
 - A microphone (built-in laptop mic works; a dedicated mic gives better results)
 - Python 3.12 (the setup script installs it for you if it's missing)
 
-**How it works, in one paragraph.** You speak into your microphone. WheelHouse captures the audio, sends it to a speech recognition engine that turns your words into text, and then decides what to do with those words. If they sound like a command ("undo", "copy", "zoom in"), WheelHouse runs the command. If they sound like regular dictation ("dear Sarah, thank you for your message"), WheelHouse types the text into whatever window is currently focused -- a document, email, chat, code editor, or anything else that accepts text. Punctuation, capitalization, and formatting are handled automatically. Text starts appearing about 1.5 to 2 seconds after you start speaking and keeps flowing continuously as you talk. You don't wait for silence.
+**How it works, in one paragraph.** You speak into your microphone. WheelHouse captures the audio, sends it to a speech recognition engine that turns your words into text, and then decides what to do with those words. If they sound like a command ("undo", "copy", "zoom in"), WheelHouse runs the command. If they sound like regular dictation ("dear Sarah, thank you for your message"), WheelHouse types the text into whatever window is currently focused -- a document, email, chat, code editor, or anything else that accepts text. Capitalization and spacing are handled automatically; you speak punctuation as words -- say "comma" or "period" and WheelHouse inserts the symbol. Text starts appearing about 1.5 to 2 seconds after you start speaking and keeps flowing continuously as you talk. You don't wait for silence.
 
 ---
 
@@ -208,7 +208,7 @@ A GPU with 1-2 GB of VRAM is plenty for the STT model. If you don't have a discr
 - **Modern CPU-only**: 2-3 seconds for the first word.
 - **Older CPUs**: 3-5 seconds or more -- noticeable enough that dictation feels interrupted.
 
-These are speech-to-text latencies only. Commands that call the AI server (like "x-ray fix it") have an additional round-trip to your configured `[ai.server]` on top of these figures; the extra time depends on which server and model you use.
+These are speech-to-text latencies only. Commands that call the AI server (like "x-ray fix") have an additional round-trip to your configured `[ai.server]` on top of these figures; the extra time depends on which server and model you use.
 
 ### Tips for slow machines
 
@@ -244,16 +244,18 @@ WheelHouse turns what you say into keystrokes, text, and system actions. Most co
 
 1. Dictate the body of the message normally. Sprinkle punctuation as you go: "hi team comma new paragraph the release is ready period"
 2. Notice a typo two characters back: say **"backspace 2"** to rub out the last two characters, then re-dictate.
-3. Finished the draft but the tone is rough: select the paragraph with **"select paragraph"**, then say **"x-ray fix it"** to send it to the configured AI server for grammar and flow cleanup.
+3. Finished the draft but the tone is rough: select the paragraph with **"select paragraph"**, then say **"x-ray fix"** to send it to the configured AI server for grammar and flow cleanup.
 4. Happy with the result: say **"x-ray activate outlook"** (or whatever your email app is) and **"paste"** if needed.
 
 **Example 2 -- Editing a line of code**
 
-1. Dictate: "def process underscore file parentheses file path colon string parentheses"
-2. Cursor is at the end of the line. Say **"go home"** to jump to the beginning.
-3. Say **"go right 4 words"** to skip past "def process file path".
+1. Dictate the name: **"def process underscore file"** -- the spoken "underscore" becomes `_`, giving `def process_file`.
+2. Say **"parentheses"** on its own -- WheelHouse inserts an empty `()` pair and drops the cursor inside it.
+3. Dictate the argument between the parentheses: **"file path colon string"** -- the spoken "colon" becomes `:`.
 4. Need to wrap a word in quotes: select it with **"select word"**, then say **"quotes"** to wrap it.
 5. Save the file: **"x-ray save"**.
+
+   (Say "parentheses" on its own to get an empty pair. If you say "parentheses" followed by more words in the same breath, WheelHouse wraps all of those words verbatim -- symbol words like "colon" spoken after it are typed literally, not converted.)
 
 **Example 3 -- Researching something you copied**
 
@@ -268,10 +270,8 @@ WheelHouse turns what you say into keystrokes, text, and system actions. Most co
 
 | Say this | What happens | Notes |
 |---|---|---|
-| push to talk mode | Switches to press-and-hold listening mode | |
-| click to talk mode | Toggles listening on or off with a click | |
-| x-ray wheelhouse help | Opens the Help chat window | |
-| x-ray wheelhouse help [question] | Opens Help chat and asks your question | Question answered by the configured AI server |
+| x-ray push to talk mode | Switches to press-and-hold listening mode | Needs the "x-ray" prefix |
+| click to talk mode | Switches back to toggle (click-to-listen) mode | |
 | x-ray wheelhouse help online | Opens the configured hosted help URL in a browser (`[ai.help] gem_url`) | Requires `gem_url` to be set |
 | x-ray patterns | Opens the Pattern Manager | See special commands below |
 
@@ -282,7 +282,7 @@ WheelHouse turns what you say into keystrokes, text, and system actions. Most co
 | backspace | Deletes one character to the left | |
 | backspace [number] | Deletes that many characters to the left | e.g. "backspace 5" |
 | delete | Deletes one character to the right | |
-| delete [number] | Deletes that many characters to the right | |
+| delete [number] | Deletes that many characters to the right | e.g. "delete 5"; counts are capped at 50 |
 | delete word | Deletes the entire word under the cursor | |
 | new line | Inserts a line break without submitting the field | Works inline during dictation |
 | new paragraph | Inserts two line breaks | Works inline during dictation |
@@ -291,13 +291,13 @@ WheelHouse turns what you say into keystrokes, text, and system actions. Most co
 | outdent | Same as shift tab | |
 | escape | Presses the Escape key | |
 | submit | Presses Enter to submit the field | |
-| press [keys] | Presses any key combination | e.g. "press enter", "press control alt delete", "press F5" |
-| x-ray insert [text] | Inserts raw text with no capitalization or formatting | Useful for emails, tags like "TODO:" |
+| press [keys] | Presses any key combination | e.g. "press enter", "press alt f4", "press F5" |
+| insert [text] | Inserts raw text with no capitalization or formatting | Useful for tags like "TODO:"; the "x-ray" prefix is optional |
 | item [number] | Inserts a numbered list marker like "1." | e.g. "item 1", "item 5" |
 
 ##### The "press [keys]" Command in Detail
 
-"press [keys]" is the generic escape hatch for any keyboard shortcut. Modifiers are automatically held down first regardless of the order you say them -- so "press delete control" is equivalent to "press control delete". If any word in the phrase is unrecognized, WheelHouse falls through and dictates the whole phrase as regular text instead of pressing anything.
+"press [keys]" is the generic escape hatch for any keyboard shortcut. Modifiers are automatically held down first regardless of the order you say them -- so "press delete control" is equivalent to "press control delete". If any word in the phrase is unrecognized, WheelHouse presses nothing and discards the phrase -- it is not typed as text.
 
 **Modifier keys you can say**: control (or ctrl), alt, shift, windows (or win).
 
@@ -305,9 +305,11 @@ WheelHouse turns what you say into keystrokes, text, and system actions. Most co
 
 **Function keys**: f1 through f12. If your STT hyphenates them (like "f-11"), WheelHouse handles that automatically.
 
-**Letters and digits**: Any single letter a-z and any digit 0-9 are accepted directly. Example: "press control shift t".
+**Letters**: Any single letter a-z is accepted directly. Example: "press control shift t".
 
-**Symbols by spoken name**: backtick, tilde, semicolon, colon, slash (or forward slash), backslash (or back slash), pipe, question (or question mark), comma, period (or dot), quote (or double quote), single quote (or apostrophe), left/right bracket, left/right brace, left/right parenthesis (also accepts open/close), less than, greater than, equals (or equal), plus, minus (also hyphen or dash), underscore, hash (also hashtag or pound), at (or at sign), ampersand (or and sign), asterisk (or star), caret, percent, dollar (or dollar sign), exclamation (or bang).
+**Digits**: A digit works only when another key name follows it. Avoid ending the phrase with a digit -- a trailing digit is read as a repeat count, so "press control 2" presses Ctrl twice instead of Ctrl+2.
+
+**Symbols by spoken name**: these symbol names are reliably pressable -- backtick, semicolon, slash (or forward slash), backslash (or back slash), comma, period (or dot), single quote (or apostrophe), left/right bracket (also accepts open/close), equals (or equal), minus (also hyphen or dash), right parenthesis (or close paren). Other symbol names are not reliable yet and are best avoided in "press": the shifted symbols (colon, tilde, pipe, question mark, double quote, braces, less/greater than, plus, underscore, left parenthesis) come out as the wrong character, and hash, at, ampersand, asterisk, caret, percent, dollar, and exclamation press nothing at all. To type any of these characters, dictate them as punctuation words instead (see the Punctuation and Symbols table).
 
 **Examples**: "press control shift t", "press f5", "press alt f4", "press windows d", "press left bracket".
 
@@ -343,7 +345,7 @@ WheelHouse turns what you say into keystrokes, text, and system actions. Most co
 
 #### Cursor Navigation
 
-The "go" and "grab" commands can be combined with directions, counts, and units. "go" moves the cursor; "grab" moves and selects along the way. You can chain multiple moves in one utterance using "then".
+The "go" and "grab" commands can be combined with directions, counts, and units. "go" moves the cursor; "grab" moves and selects along the way. You can chain multiple moves in one utterance using "then". The utterance must start with "go" -- "grab" works only as a step chained after a "go" move (for example "go home then grab to end"). Said on its own, "grab ..." is typed as dictation.
 
 | Say this | What happens |
 |---|---|
@@ -352,18 +354,17 @@ The "go" and "grab" commands can be combined with directions, counts, and units.
 | go top | Jumps to the top of the document |
 | go bottom | Jumps to the bottom of the document |
 | go left / go right | Moves one character |
-| go left 5 / go right 5 | Moves five characters (numbers or spoken words like "three" also work, up to 50) |
+| go left 5 / go right 5 | Moves five characters (digits work up to 50; spoken number words are recognized only up to "ten") |
 | go right 3 words | Moves three words to the right |
 | go left 2 paragraphs | Moves two paragraphs to the left |
 | go start of word | Jumps to the start of the current word |
-| go end of word | Jumps to the end of the current word |
+| go end of word | Jumps forward past the current word (in most apps the cursor lands at the start of the next word) |
 | go beginning of paragraph | Jumps to the start of the current paragraph |
-| go end of paragraph | Jumps to the end of the current paragraph |
-| grab to end | Selects from the cursor to the end of the line |
-| grab to home | Selects from the cursor to the start of the line |
-| grab right 3 words | Selects three words to the right |
-| grab left 5 | Selects five characters to the left |
-| go home then grab to end | Chained -- jumps to start of line and then selects to end |
+| go end of paragraph | Jumps forward to the next paragraph (in most apps the cursor lands just past the end of the current one) |
+| go home then grab to end | Jumps to the line start, then selects to the line end |
+| go end then grab to home | Jumps to the line end, then selects back to the line start |
+| go home then grab right 3 words | Selects the first three words of the line |
+| go end then grab left 5 | Selects the last five characters of the line |
 
 #### Text Formatting
 
@@ -373,13 +374,13 @@ All of these apply to whatever text is currently selected.
 |---|---|---|
 | uppercase | Converts selection to UPPERCASE | |
 | lowercase | Converts selection to lowercase | |
-| capitalize | Capitalizes the first letter | |
+| capitalize | Capitalizes the first letter and lowercases the rest of the selection | |
 | title case | Converts selection to Title Case | |
 | snake case | Converts selection to snake_case | |
 | camel case | Converts selection to camelCase | |
 | pascal case | Converts selection to PascalCase | |
 | kebab case | Converts selection to kebab-case | |
-| compress | Removes extra spacing from the selection | |
+| compress | Removes all spaces from the selection, joining the words together (e.g. "hello world" becomes "helloworld") | |
 | x-ray bold text | Bolds the selection (Ctrl+B) | |
 | x-ray italics | Italicizes the selection (Ctrl+I) | |
 | x-ray underline | Underlines the selection (Ctrl+U) | |
@@ -412,7 +413,7 @@ These work **inline during dictation** -- you do not need to pause or say them a
 | exclamation point (or mark) | ! |
 | apostrophe | ' |
 | hyphen | - |
-| dash | -- (em dash) |
+| dash | — (em dash) |
 | slash | / |
 | backslash | \ |
 | backtick | ` |
@@ -431,16 +432,14 @@ These work **inline during dictation** -- you do not need to pause or say them a
 | ellipsis | ... |
 | space bar | (a literal space) |
 
-If the speech recognizer mishears "comma" as "call mom", "karma", or "kama", WheelHouse still inserts a comma. If it mishears "Claude" as "Claudia" or "clawed", it still types "Claude".
+If the speech recognizer routinely mishears a word -- for example "comma" heard as "karma", or "Claude" heard as "clawed" -- you can teach WheelHouse a personal correction in the Pattern Manager (say "x-ray patterns"). The correction then applies inline during dictation. WheelHouse does not ship these mishear corrections built in.
 
 #### Application Switching
 
 | Say this | What happens | Notes |
 |---|---|---|
 | x-ray browser | Brings your browser to the front | |
-| x-ray editor | Brings your code editor to the front | |
-| x-ray activate [app name] | Brings the named app forward | e.g. "x-ray activate outlook" |
-| keyboard | Launches the on-screen virtual keyboard | |
+| x-ray activate [app name] | Brings the named app forward | e.g. "x-ray activate outlook", "x-ray activate code" |
 | Windows settings | Opens the Windows Settings app | |
 
 #### Window Management
@@ -449,8 +448,8 @@ If the speech recognizer mishears "comma" as "call mom", "karma", or "kama", Whe
 |---|---|---|
 | zoom in | Zooms in (Ctrl and plus) | |
 | zoom out | Zooms out (Ctrl and minus) | |
-| create tab | Opens a new tab (Ctrl+N) | |
-| create window | Opens a new window (Ctrl+Shift+N) | |
+| create tab | Sends Ctrl+N | New tab in most editors; opens a new window, not a tab, in most browsers |
+| create window | Sends Ctrl+Shift+N | New window in editors; opens a private/incognito window in most browsers |
 | x-ray close window | Closes the active window (Alt+F4) | Requires hotword for safety |
 | x-ray maximize | Maximizes the active window | |
 | x-ray minimize | Minimizes the active window | |
@@ -464,7 +463,7 @@ If the speech recognizer mishears "comma" as "call mom", "karma", or "kama", Whe
 | x-ray find [text] | Opens find and types the search term | |
 | x-ray search | Copies the selection and web searches for it | |
 | x-ray replace | Opens find-and-replace (Ctrl+H) | |
-| x-ray fix it | Sends the selection to the configured AI server for grammar and polish | Requires [ai.server] to be configured |
+| x-ray fix | Sends the selection to the configured AI server for grammar and polish | Requires [ai.server] to be configured |
 | x-ray cancel fix | Cancels an in-progress fix | |
 | x-ray boost | Adds the selected text to the STT hints list | See special commands below |
 | x-ray patterns | Opens the Pattern Manager | See special commands below |
@@ -475,17 +474,17 @@ WheelHouse can click buttons, links, menu items, and other controls for you. You
 
 | Say this | What happens | Notes |
 |---|---|---|
-| x-ray click [name] | Clicks the control with that name | e.g. "x-ray click submit", "x-ray click the file menu" |
-| x-ray show numbers | Puts a number on every clickable control in the front window | Numbers stay on until you hide them or click one |
-| x-ray click [number] | Clicks the control labelled with that number | e.g. "x-ray click 3"; controls are numbered 1, 2, 3... from top to bottom |
-| x-ray hide numbers | Removes the numbers | |
+| click [name] | Clicks the control with that name | e.g. "click submit", "click the file menu"; the "x-ray" prefix is optional |
+| apply numbers | Puts a number on every clickable control in the front window | Numbers stay on until you dismiss them |
+| click [number] | Clicks the control labelled with that number | e.g. "click 3"; controls are numbered 1, 2, 3... from top to bottom |
+| dismiss numbers | Removes the numbers | |
 
 A few things worth knowing:
 
-- **The numbers stay on screen** until you say "x-ray hide numbers" or click one of them. Say "x-ray show numbers" again at any time to repaint them, and the numbers follow you to whichever window is in front.
-- **If a name is ambiguous, the numbers appear by themselves.** When you say "x-ray click [name]" and more than one control matches, WheelHouse shows numbers on just the matching controls so you can say "x-ray click [number]" to pick the one you meant.
-- **Controls whose name is itself a number.** While the numbers are showing, saying a number always picks the labelled control with that number -- so a control whose real name is a digit (a calculator "7", a spreadsheet column header, a chord button) cannot be reached by saying its number. To click a control like that by its name, say "x-ray hide numbers" first, then say its name.
-- **If the numbers look out of place, say "x-ray show numbers" again.** WheelHouse cannot always tell when a window scrolls or swaps its content, so after scrolling or a page change the numbers may sit in their old spots until you repaint them.
+- **The numbers stay on screen** until you say "dismiss numbers". Clicking a numbered control does not remove them -- they refresh in place so you can pick another. Say "apply numbers" again at any time to repaint them, and the numbers follow you to whichever window is in front.
+- **If a name is ambiguous, the numbers appear by themselves.** When you say "click [name]" and more than one control matches, WheelHouse shows numbers on just the matching controls so you can say "click [number]" to pick the one you meant.
+- **Controls whose name is itself a number.** While the numbers are showing, saying a number always picks the labelled control with that number -- so a control whose real name is a digit (a calculator "7", a spreadsheet column header, a chord button) cannot be reached by saying its number. To click a control like that by its name, say "dismiss numbers" first, then say its name.
+- **If the numbers look out of place, say "apply numbers" again.** WheelHouse cannot always tell when a window scrolls or swaps its content, so after scrolling or a page change the numbers may sit in their old spots until you repaint them.
 
 ### Special Commands with Extra Explanation
 
@@ -495,9 +494,9 @@ Say "literal" followed by whatever you want to type, and WheelHouse will insert 
 
 - Example: saying "copy" normally triggers the copy command, but saying "literal copy" just types the word "copy".
 - Example: "literal period" types the word "period" instead of inserting a full stop.
-- Example: "literal new line" types the phrase "new line" instead of pressing Enter.
+- Example: "literal new line" types the phrase "new line" instead of inserting a line break.
 
-This command only takes effect when "literal" is the very first word of your utterance, so it will not interfere with normal dictation that happens to contain the word "literal" in the middle of a sentence.
+"literal" takes effect wherever it appears in an utterance, not only as the first word: everything you say after "literal" is typed exactly as spoken, and the word "literal" itself is not typed. This means a sentence with "literal" in the middle still types the rest of that sentence verbatim, so use it only when you actually want the escape hatch. To type the word "literal" by itself, say "literal literal".
 
 **"x-ray boost"**
 
@@ -540,21 +539,20 @@ The decision depends on where the word appears in your utterance:
 
 - **First word of an utterance**: WheelHouse checks whether the word could be the start of a command by looking it up in its pattern catalog. If yes, it buffers the word and waits for the next word or two to figure out which command you're saying. If no, it treats the word as dictation and starts typing.
 - **Middle of an utterance**: WheelHouse treats the word as dictation unless it's a known replacement word (like "period" or "comma"), in which case it substitutes the symbol inline.
-- **After the hotword "x-ray"**: WheelHouse forces command mode. This lets protected commands fire even mid-utterance, and ensures WheelHouse doesn't accidentally dictate what you meant as a command.
+- **After the hotword "x-ray" at the start of an utterance**: WheelHouse enters command mode so protected commands can fire. The hotword only works as the very first word -- spoken in the middle of an utterance, "x-ray" is just typed as text. If nothing after the hotword matches a command, the whole phrase (including "x-ray") is typed as dictation.
 
 ### Streaming behavior
 
 Text appears **as you speak**, not after you stop. You'll see the first word about 1.5-2 seconds after you start talking, then subsequent words flow continuously every 100-200ms. You can start editing or speaking again before the current utterance finishes -- WheelHouse handles overlapping utterances gracefully.
 
-### Chaining commands with "then"
+### Chaining cursor moves with "then"
 
-You can combine multiple commands in one utterance by saying **"then"** between them:
+You can chain multiple cursor moves in one utterance by saying **"then"** between them. This works only with the "go" and "grab" navigation commands:
 
 - "go home then grab to end" -- jumps to the start of the line, then selects to the end.
-- "select word then capitalize" -- selects the current word, then capitalizes it.
-- "copy then x-ray browser then paste" -- copies the current selection, switches to the browser, and pastes.
+- "go top then grab to bottom" -- jumps to the top of the document, then selects to the bottom.
 
-"Then" is a natural way to script short workflows without memorizing combinations.
+"Then" chaining works only for cursor movement. Every other command (copy, paste, switching windows, and so on) must be spoken as its own separate utterance.
 
 ---
 
@@ -579,7 +577,7 @@ Two things to know about push-to-talk:
 
 Three ways, any time:
 
-- **Voice**: say **"push to talk mode"** to switch to push-to-talk, or **"click to talk mode"** to switch back to toggle.
+- **Voice**: say **"x-ray push to talk mode"** to switch to push-to-talk, or **"click to talk mode"** to switch back to toggle.
 - **Tray menu**: right-click the tray icon and check or uncheck **"Push-to-Talk Mode"**.
 - **Config**: set `interaction_mode = "toggle"` or `"push_to_talk"` in the `[speech]` section of `config.toml`. This sets the mode WheelHouse starts in; the voice and tray switches change it while running.
 
@@ -645,13 +643,13 @@ WheelHouse's settings live in a single file: `services/wheelhouse/config.toml`. 
 - Valid values: Whole number of pixels
 
 **BRIGHTNESS_INCREMENT**
-- What it does: How much brightness changes each time you say "brighter" or "dimmer."
-- Why change it: Raise for bigger jumps per command, lower for finer control.
+- What it does: How much brightness changes per step of the mouse thumb wheel while the pointer is in the left-edge brightness zone.
+- Why change it: Raise for bigger jumps per step, lower for finer control.
 - Default: 1.0
 - Valid values: Decimal number (a sensible range is 0.5 to 5.0)
 
 **VOLUME_INCREMENT**
-- What it does: How much volume changes per "louder" / "quieter" command.
+- What it does: How much volume changes per step of the mouse thumb wheel while the pointer is in the volume zone (outside the left-edge brightness zone).
 - Why change it: Raise for bigger jumps, lower for finer control.
 - Default: 0.5
 - Valid values: Decimal number
@@ -749,7 +747,7 @@ WheelHouse's settings live in a single file: `services/wheelhouse/config.toml`. 
 - Valid values: true / false
 
 **interaction_mode**
-- What it does: How you control listening. `toggle` means say a hotword or click to start/stop. `push_to_talk` means hold a key while speaking, like a walkie-talkie.
+- What it does: How you control listening. `toggle` means click the floating button or tray icon to start/stop listening. `push_to_talk` means hold the button down while speaking, like a walkie-talkie.
 - Why change it: Switch to push-to-talk in noisy environments where you want precise control.
 - Default: "toggle"
 - Valid values: "toggle" or "push_to_talk"
@@ -777,8 +775,8 @@ WheelHouse's settings live in a single file: `services/wheelhouse/config.toml`. 
 - Valid values: One of the supported wake-word models (check available models in your WheelHouse installation)
 
 **sensitivity**
-- What it does: How easily WheelHouse accepts a possible wake-word match. Higher = triggers more easily but with more false alarms.
-- Why change it: Raise if the wake word is hard to trigger; lower if it goes off on its own too often.
+- What it does: The confidence a possible wake-word match must reach before WheelHouse accepts it. Lower = triggers more easily but with more false alarms; higher makes the wake word harder to trigger.
+- Why change it: Lower it if the wake word is hard to trigger; raise it if it goes off on its own too often.
 - Default: 0.5
 - Valid values: Decimal between 0.0 and 1.0
 
@@ -916,7 +914,7 @@ If WheelHouse feels sluggish, or commands and dictation are slightly unreliable 
 
 7. **Turn off audio suppression** if you don't use Sonos and your PC rarely plays audio: set `ENABLE_AUDIO_SUPPRESSION = false` and `ENABLE_SONOS_SUPPRESSION = false`. This removes a background monitoring task.
 
-8. **Make the wake word easier to trigger.** If "computer" isn't reliably activating WheelHouse, raise `[wake_word] sensitivity` from 0.5 to 0.7. If you get too many false triggers instead, lower it to 0.3.
+8. **Make the wake word easier to trigger.** If "computer" isn't reliably activating WheelHouse, lower `[wake_word] sensitivity` from 0.5 to 0.3. If you get too many false triggers instead, raise it to 0.7.
 
 9. **Extend the PTT safety timeout.** If you use push-to-talk for long dictations, raise `[speech] ptt_safety_timeout_seconds` from 30 to 60 or 90 so the safety release doesn't cut you off.
 
@@ -924,13 +922,13 @@ If WheelHouse feels sluggish, or commands and dictation are slightly unreliable 
 
 ## Plugins
 
-Plugins extend WheelHouse with optional integrations for external hardware and services like TVs, speakers, laptop displays, and Windows system features. Each plugin lives in its own `[plugins.*]` section of `config.toml` and has an `enabled = true` or `enabled = false` flag so you can turn it on or off without removing configuration. Plugins communicate with the rest of WheelHouse through an internal event bus, which means they can react to voice commands, mouse-wheel input, and system events without tight coupling. If a plugin's hardware is missing or offline, WheelHouse keeps running -- the plugin simply reports itself as unhealthy and retries in the background.
+Plugins extend WheelHouse with optional integrations for external hardware and services like TVs, speakers, laptop displays, and Windows system features. Each plugin lives in its own `[plugins.*]` section of `config.toml` and has an `enabled = true` or `enabled = false` flag so you can turn it on or off without removing configuration. Plugins communicate with the rest of WheelHouse through an internal event bus, which means they can react to mouse-wheel input and system events without tight coupling. If a plugin's hardware is missing or offline, WheelHouse keeps running -- the plugin simply reports itself as unhealthy and retries in the background.
 
 ---
 
 ### Internal Panel
 
-**What it does**: Controls the brightness of a Windows laptop's built-in screen so you can adjust it with voice or the mouse wheel.
+**What it does**: Controls the brightness of a Windows laptop's built-in screen so you can adjust it with the mouse thumb wheel (pointer on the left side of the screen).
 
 **Enable/disable**: Set `plugins.internal_panel.enabled` to `true` or `false` in config.toml.
 
@@ -938,13 +936,13 @@ Plugins extend WheelHouse with optional integrations for external hardware and s
 
 **What it connects to**: The laptop's built-in display via the Windows WMI brightness API (`WmiMonitorBrightness`).
 
-**When to enable**: On a Windows laptop where you want voice or mouse-wheel control of the internal screen's brightness. On a desktop PC (no internal panel), the plugin gracefully does nothing, so it's safe to leave enabled.
+**When to enable**: On a Windows laptop where you want mouse-wheel control of the internal screen's brightness. On a desktop PC (no internal panel), the plugin gracefully does nothing, so it's safe to leave enabled.
 
 ---
 
 ### Sonos Speaker Control
 
-**What it does**: Adjusts Sonos speaker volume by voice or mouse wheel and tells WheelHouse to pause listening while music is playing so audio doesn't get mistranscribed as commands.
+**What it does**: Adjusts Sonos speaker volume with the mouse thumb wheel (when WheelHouse's volume router detects your PC or TV audio is playing through the Sonos) and tells WheelHouse to pause listening while music is playing so audio doesn't get mistranscribed as commands.
 
 **Enable/disable**: Set `plugins.sonos.enabled` to `true` or `false`.
 
@@ -954,15 +952,15 @@ Plugins extend WheelHouse with optional integrations for external hardware and s
 
 **What it connects to**: Sonos speakers on your local network via Sonos' UPnP API (no Sonos cloud account required).
 
-**When to enable**: If you own Sonos speakers and want WheelHouse to automatically suppress voice recognition while they're playing, plus control their volume with your existing WheelHouse input methods.
+**When to enable**: If you own Sonos speakers and want WheelHouse to automatically suppress voice recognition while they're playing, plus control their volume with the mouse thumb wheel.
 
 ---
 
 ### System Volume
 
-**What it does**: Controls the Windows system volume (the same volume your taskbar speaker icon controls) in response to voice commands and mouse-wheel input.
+**What it does**: Controls the Windows system volume (the same volume your taskbar speaker icon controls) in response to mouse-wheel input.
 
-**Enable/disable**: Set `plugins.system_volume.enabled` to `true` or `false`. Note: this plugin and the Sonos plugin both handle volume commands -- typically you'd pick one based on which speakers you use.
+**Enable/disable**: Set `plugins.system_volume.enabled` to `true` or `false`. Note: this plugin and the Sonos plugin can both stay enabled -- a volume router picks one at startup, so they don't conflict.
 
 **Configuration**:
 - `device_type` -- Which audio device to control. `"default"` uses the current Windows default playback device; `"communications"` uses the communications default; or specify a device name directly.
@@ -972,13 +970,13 @@ Plugins extend WheelHouse with optional integrations for external hardware and s
 
 **What it connects to**: Windows Core Audio APIs via the pycaw library (fully local, no network).
 
-**When to enable**: Any Windows PC where you want voice or mouse-wheel control of the system volume. This is the right choice for most users who don't own Sonos speakers.
+**When to enable**: Any Windows PC where you want mouse-wheel control of the system volume. This is the right choice for most users who don't own Sonos speakers.
 
 ---
 
 ### Sony Bravia TV
 
-**What it does**: Integrates a Sony Bravia TV into WheelHouse's brightness control system so voice brightness commands can dim or brighten the TV when it's being used as a monitor.
+**What it does**: Integrates a Sony Bravia TV into WheelHouse's brightness control system so WheelHouse brightness adjustments (the mouse thumb wheel with the pointer on the left side of the screen) can dim or brighten the TV when it's being used as a monitor.
 
 **Enable/disable**: Set `plugins.bravia.enabled` to `true` or `false`.
 
@@ -989,7 +987,7 @@ Plugins extend WheelHouse with optional integrations for external hardware and s
 
 **What it connects to**: A Sony Bravia TV on your local network via Sony's IP Control REST API.
 
-**When to enable**: If you use a Sony Bravia TV as a computer display and want WheelHouse to dim it as part of voice brightness commands, alongside your other displays.
+**When to enable**: If you use a Sony Bravia TV as a computer display and want WheelHouse to dim it as part of its brightness adjustments, alongside your other displays.
 
 ---
 
@@ -1038,7 +1036,7 @@ A fallback display dimmer that uses a translucent software overlay instead of ha
 
 Three rules cover almost every setup decision:
 
-1. **Enable only ONE volume plugin** -- Sonos OR System Volume, not both. They both answer volume commands and will conflict. System Volume is the right choice for most users; Sonos only if you own Sonos speakers.
+1. **Both volume plugins can stay enabled.** A volume router picks one at startup -- System Volume unless your PC audio is playing through a Sonos receiving TV audio, in which case Sonos -- so they never conflict. System Volume is the right choice for most users; enable Sonos too only if you own Sonos speakers.
 2. **Brightness plugins can combine.** Enable several for multi-display setups (for example a laptop panel plus a TV): WheelHouse adjusts all available hardware together, and when hardware hits its limit (fully bright or fully dim), further adjustment cascades to software dimming automatically. No priority configuration is needed.
 3. **Restart WheelHouse after any plugin change.** Plugins are discovered and initialized at startup.
 
