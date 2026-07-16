@@ -80,9 +80,15 @@ class TestAIConfigParsing:
         server = config_data["ai"]["server"]
         assert "base_url" in server
         assert "model" in server
-        assert "api_key" in server
         assert "timeout_s" in server
         assert "kind" in server
+
+    def test_ai_server_has_no_api_key_slot(self, config_data):
+        # wh-tracked-config-apikey-hygiene: the key comes from the
+        # WHEELHOUSE_AI_API_KEY environment variable; a config slot invites
+        # storing a secret in a git-tracked file (and drifted from the
+        # shipped sanitized config, failing public CI).
+        assert "api_key" not in config_data["ai"]["server"]
 
     # --- retained help keys ---
 
