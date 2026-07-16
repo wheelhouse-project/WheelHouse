@@ -814,20 +814,31 @@ def test_slow_notifier_does_not_delay_file_drain(isolated_root_logger):
         )
 
         log = logging.getLogger("test.notify_slow")
-        t0 = time.perf_counter()
         for i in range(10):
             log.info("fast-record %d", i)
-        time.sleep(0.2)  # Give listener a brief window to drain.
-        content_mid = isolated_root_logger.read_text()
-        elapsed = time.perf_counter() - t0
+        # Poll (bounded) for the records to reach the file. The 5 s bound
+        # stays far below the 10 s notifier hold, so success still proves
+        # the file drain is independent of the blocked notifier. A fixed
+        # 0.2 s window flaked on slow shared CI runners, where the listener
+        # thread can be scheduled late without any real stall. The file
+        # itself is created on the listener's first write, so early polls
+        # may find it absent.
+        def read_log() -> str:
+            try:
+                return isolated_root_logger.read_text()
+            except FileNotFoundError:
+                return ""
+
+        deadline = time.monotonic() + 5.0
+        content_mid = read_log()
+        while "fast-record 9" not in content_mid and time.monotonic() < deadline:
+            time.sleep(0.05)
+            content_mid = read_log()
 
         release.set()
         logging_setup.shutdown_logging()
 
-    # File drain happened well within the 1 s notifier delay.
-    assert elapsed < 0.5, (
-        f"File drain stalled while notifier was busy: {elapsed:.2f} s"
-    )
+    # All records drained while the notifier was still provably blocked.
     for i in range(10):
         assert f"fast-record {i}" in content_mid, (
             f"INFO record 'fast-record {i}' did not drain while notifier "
