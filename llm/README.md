@@ -5,21 +5,17 @@ questions from it. Load it into the LLM you already use — ChatGPT, Gemini,
 Claude, or Perplexity — and you get a personal WheelHouse support assistant
 that explains commands and settings in plain language.
 
-## The two files
+## The one file you need
 
 | File | What it is | What you do with it |
 |------|------------|---------------------|
 | [`wheelhouse_help.md`](../services/wheelhouse/knowledge/wheelhouse_help.md) | The complete WheelHouse user guide | Upload it to your AI service as a knowledge file |
-| [`assistant-instructions.txt`](./assistant-instructions.txt) | A short, provider-neutral instruction text | Paste it into your AI service's instructions field |
 
-Pasting the instructions is recommended but optional: the same rules are
-embedded at the top of the help document, so an assistant that only has the
-uploaded file still behaves sensibly. If a service refuses a `.md` upload,
-rename the file to `wheelhouse_help.txt` — the content is plain text.
-
-`assistant-instructions.txt` is generated from the help document's embedded
-"Instructions for AI Assistant" section. Don't edit it by hand; it is
-regenerated whenever the help document changes.
+The assistant behavior rules are embedded at the top of the guide (its
+"Instructions for AI Assistant" section), so the uploaded file is all a
+service needs — there is nothing to paste. If a service refuses a `.md`
+upload, rename the file to `wheelhouse_help.txt` — the content is plain
+text.
 
 ## Setup steps for each service
 
@@ -33,3 +29,18 @@ service:
 
 All four work on the service's free plan, with one caveat: Perplexity
 documents file uploads inside a project only for its paid plans.
+
+## For builders: the official GPT's files
+
+This folder also ships the two files behind the official WheelHouse
+ChatGPT GPT, which fetches the current guide live at answer time instead
+of using an uploaded copy:
+
+- [`gpt-instructions.txt`](./gpt-instructions.txt) — the GPT's
+  instructions: fetch the guide before answering, and refuse to answer
+  from memory when the fetch fails.
+- [`gpt-action-openapi.json`](./gpt-action-openapi.json) — the GPT Action
+  schema: a single GET of the guide's raw GitHub URL.
+
+You can reuse both to build your own live-fetching assistant on any
+platform that can fetch a URL while answering.

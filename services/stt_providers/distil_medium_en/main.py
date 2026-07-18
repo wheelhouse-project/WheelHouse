@@ -105,7 +105,7 @@ class DistilMediumServer:
         wake_word_mode: str = "idle_recovery",
         wake_word_model_dir: str = "data/wake_words",
         hotwords: str | None = None,
-        hotwords_enabled: bool = True,
+        hotwords_enabled: bool = False,
     ):
         self.sample_rate = sample_rate
         self.chunk_ms = chunk_ms
@@ -217,10 +217,13 @@ class DistilMediumServer:
     def _hotwords_enabled_now(self) -> bool:
         """Read the [hotwords] enabled gate fresh from config.toml so a
         user edit after startup takes effect; fall back to the
-        construction-time cache when the file is unreadable mid-edit."""
+        construction-time cache when the file is unreadable mid-edit.
+        A missing section means OFF: the bias collapses distil-medium.en
+        decoding (wh-distil-hotwords-decode-collapse), so it needs an
+        explicit opt-in."""
         try:
             config = load_config()
-            enabled = bool(config.get("hotwords", {}).get("enabled", True))
+            enabled = bool(config.get("hotwords", {}).get("enabled", False))
             self.hotwords_enabled = enabled
             return enabled
         except Exception as e:
@@ -272,10 +275,14 @@ class DistilMediumServer:
                     logger.info(
                         "Hint added; hotwords disabled in config, no restart"
                     )
+                    # Do NOT suggest turning [hotwords] on -- the bias
+                    # collapses distil-medium.en decoding
+                    # (wh-distil-hotwords-decode-collapse). The hint
+                    # still reaches the engines that read hints.txt.
                     self.forwarder.send_notification(
                         "STT Hint Saved",
-                        f"Saved '{hint}' - enable [hotwords] in config.toml "
-                        "to use it",
+                        f"Saved '{hint}' - it will apply to STT engines "
+                        "that support hints",
                     )
                     return
                 logger.info("Hint added successfully, triggering hard restart")
@@ -496,7 +503,10 @@ if __name__ == "__main__":
     # wh-apmg.1.2: the escape hatch. Emptying shared/hints.txt would
     # also destroy Google STT phrase adaptation and parakeet hotwords,
     # so a misbehaving distil bias needs its own off switch.
-    hotwords_enabled = bool(config.get("hotwords", {}).get("enabled", True))
+    # wh-distil-hotwords-decode-collapse: default OFF -- the bias
+    # collapses distil-medium.en decoding at any useful hint-list size,
+    # so a missing [hotwords] section must mean disabled.
+    hotwords_enabled = bool(config.get("hotwords", {}).get("enabled", False))
     hotwords = build_hotwords_string() if hotwords_enabled else None
     if hotwords:
         logger.info(f"Hotwords loaded from hints.txt ({len(hotwords)} chars)")

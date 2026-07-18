@@ -143,6 +143,11 @@ class RealTextParser:
 
         Functions that execute directly (not via IPC) need to be mocked to
         prevent tests from actually opening browsers, running programs, etc.
+        Functions that delegate to Logic-process services (AIService,
+        LogicController click/overlay handling) must be mocked too: the
+        harness speech_handler is a plain Mock, so awaiting anything on it
+        raises "object Mock can't be used in 'await' expression"
+        (wh-smoke-await-mock).
         """
         action_funcs = self.parser.action_functions
 
@@ -166,23 +171,67 @@ class RealTextParser:
             return None
         action_funcs._functions["sleep"] = mock_sleep
 
-    async def parse_and_execute(self, text: str) -> bool:
+        # Mock fix_text_ai / cancel_fix - would await AIService methods
+        async def mock_fix_text_ai():
+            return None
+        action_funcs._functions["fix_text_ai"] = mock_fix_text_ai
+
+        async def mock_cancel_fix():
+            return None
+        action_funcs._functions["cancel_fix"] = mock_cancel_fix
+
+        # Mock wheelhouse_help_online - would os.startfile a browser URL
+        async def mock_help_online():
+            return None
+        action_funcs._functions["wheelhouse_help_online"] = mock_help_online
+
+        # Mock click_element and the overlay commands - would await
+        # LogicController click/overlay handling
+        async def mock_click_element(target_text):
+            return None
+        action_funcs._functions["click_element"] = mock_click_element
+
+        async def mock_show_overlay():
+            return None
+        action_funcs._functions["show_overlay_command"] = mock_show_overlay
+
+        async def mock_hide_overlay():
+            return None
+        action_funcs._functions["hide_overlay_command"] = mock_hide_overlay
+
+    async def parse_and_execute(self, text: str, authorized_command: bool = True) -> bool:
         """Execute real pattern matching and action execution.
 
-        Passes authorized_command=True: this harness simulates command-mode
-        text that in production has already passed the router's hotword
-        gate (wh-qj70s). Without it every requires_hotword command pattern
-        is refused and the suite fails wholesale (wh-z69w).
+        authorized_command defaults to True: this harness simulates
+        command-mode text that in production has already passed the
+        router's hotword gate (wh-qj70s). Without it every
+        requires_hotword command pattern is refused and the suite fails
+        wholesale (wh-z69w). SpeechProcessor passes the flag explicitly
+        (it calls parse_and_execute(text, authorized_command=True) after
+        its own hotword vetting), so the wrapper must accept and forward
+        it (wh-smoke-await-mock).
 
         Args:
             text: Text to match against patterns
+            authorized_command: Whether the hotword gate already vetted
+                this text
 
         Returns:
             True if pattern matched and executed, False otherwise
         """
         return await self.parser.parse_and_execute(
-            text, authorized_command=True
+            text, authorized_command=authorized_command
         )
+
+    def __getattr__(self, name):
+        """Delegate unknown attributes to the wrapped TextParser.
+
+        SpeechProcessor uses more of the TextParser surface than just
+        parse_and_execute (last_executed_pattern_type, matcher, patterns,
+        _execute_rule). Forwarding keeps this wrapper a drop-in stand-in
+        without hand-proxying each attribute (wh-smoke-await-mock).
+        """
+        return getattr(self.parser, name)
 
 
 # ============================================================================

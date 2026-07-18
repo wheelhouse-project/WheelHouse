@@ -104,8 +104,43 @@ class TestServerPassesHotwords:
         # to turn off a misbehaving bias is to empty shared/hints.txt --
         # which also destroys Google STT phrase adaptation and parakeet
         # hotwords. The gate must be read in the __main__ block.
+        # wh-distil-hotwords-decode-collapse: the fallback when the
+        # section is missing must be False -- the bias collapses
+        # distil-medium.en decoding, so absence of config means off.
         import inspect
 
         source = inspect.getsource(distil_main)
         main_block = source[source.index('if __name__ == "__main__"'):]
-        assert 'get("hotwords", {}).get("enabled", True)' in main_block
+        assert 'get("hotwords", {}).get("enabled", False)' in main_block
+
+
+class TestHotwordsOffByDefault:
+    """wh-distil-hotwords-decode-collapse: the faster-whisper hotwords
+    bias collapses distil-medium.en decoding to zero segments at any
+    useful hint-list size (measured 2026-07-17: 10 hints / ~70 chars ->
+    empty output on evaluation-corpus WAVs; live hints.txt is ~99
+    hints). The mechanism stays available for experiments, but every
+    default must be OFF."""
+
+    def test_shipped_config_disables_hotwords(self):
+        # Pin the tracked config.toml value itself. A missing section
+        # or key must FAIL (KeyError), not silently pass -- main.py
+        # falls back to its own default, and this test is the guard on
+        # the file the user actually receives.
+        import tomllib
+        from pathlib import Path
+
+        config_path = Path(distil_main.__file__).parent / "config.toml"
+        with open(config_path, "rb") as f:
+            config = tomllib.load(f)
+        assert config["hotwords"]["enabled"] is False
+
+    def test_constructor_default_is_disabled(self):
+        with (
+            patch("main.get_audio_provider"),
+            patch("main.WhisperStreamingEngine"),
+            patch("main.WSForwarder"),
+            patch("main.AudioProcessor"),
+        ):
+            server = DistilMediumServer(model_config={}, engine_config={})
+        assert server.hotwords_enabled is False

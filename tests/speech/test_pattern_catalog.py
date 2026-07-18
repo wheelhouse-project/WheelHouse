@@ -216,14 +216,37 @@ class TestPatternLookup:
             assert entry[1] in ("command", "replacement")
             assert isinstance(entry[2], dict)
 
-    def test_could_be_pattern_start_non_speech(self, catalog):
+    @staticmethod
+    def _non_speech_catalog(tmp_path):
+        """Catalog built from a synthetic file with a non-speech pattern.
+
+        The shipped catalog no longer carries a non-speech pattern (the
+        asterisk-wrapped stage-direction workaround was removed once the
+        avg_logprob filter covered that hallucination class), so these
+        tests exercise the catalog's non-speech token handling with a
+        synthetic pattern file instead.
+        """
+        patterns_file = tmp_path / "patterns.toml"
+        patterns_file.write_text(
+            'COMMAND_HOTWORD = "x-ray"\n'
+            "\n"
+            "[[pattern]]\n"
+            "pattern = '''\\*(?:cough|ahem|sniff)\\*'''\n"
+            'actions = [{ function = "text", params = [""] }]\n',
+            encoding="utf-8",
+        )
+        return PatternCatalog(str(patterns_file))
+
+    def test_could_be_pattern_start_non_speech(self, tmp_path):
         """Non-speech annotations like *cough* are recognized as pattern starts."""
+        catalog = self._non_speech_catalog(tmp_path)
         assert catalog.could_be_pattern_start("*cough*") is True
         assert catalog.could_be_pattern_start("*ahem*") is True
         assert catalog.could_be_pattern_start("*sniff*") is True
 
-    def test_non_speech_pattern_type_is_replacement(self, catalog):
+    def test_non_speech_pattern_type_is_replacement(self, tmp_path):
         """Non-speech annotations are classified as REPLACEMENT type."""
+        catalog = self._non_speech_catalog(tmp_path)
         assert catalog.get_pattern_type("*cough*") == PatternType.REPLACEMENT
 
     def test_get_matching_patterns_empty_for_unknown(self, catalog):
@@ -232,9 +255,18 @@ class TestPatternLookup:
         assert patterns == []
 
     def test_get_all_patterns_returns_all(self, catalog):
-        """get_all_patterns returns all loaded patterns."""
+        """get_all_patterns returns all loaded patterns except trailing.
+
+        Trailing-position commands (wh-2vz) count toward pattern_count but
+        live in catalog.trailing_commands and are deliberately excluded
+        from get_all_patterns() -- they fire via the trailing-command
+        mechanism, not the regular parse path.
+        """
         all_patterns = catalog.get_all_patterns()
-        assert len(all_patterns) == catalog.pattern_count
+        assert len(all_patterns) == (
+            catalog.pattern_count - len(catalog.trailing_commands)
+        )
+        assert len(catalog.trailing_commands) >= 1  # "submit" ships today
 
 
 # ============================================================================

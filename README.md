@@ -96,11 +96,10 @@ include passwords and medical text. The short version:
 The user help is written so an AI chat service can answer questions from
 it. If you already use ChatGPT, Gemini, Claude, or Perplexity, you can
 turn the help document into a personal WheelHouse support assistant: you
-need only two files — the
+need only one file — the
 [help document](./services/wheelhouse/knowledge/wheelhouse_help.md) to
-upload and the short
-[instruction text](./llm/assistant-instructions.txt) to paste. The
-[llm/ folder](./llm/README.md) explains the two files, and the setup
+upload. Its assistant rules are embedded at the top, so there is nothing
+to paste. The [llm/ folder](./llm/README.md) explains the setup, and the
 steps for each service live on the project site:
 [ChatGPT](https://wheelhouse-project.github.io/WheelHouse/#llm-chatgpt) ·
 [Gemini](https://wheelhouse-project.github.io/WheelHouse/#llm-gemini) ·

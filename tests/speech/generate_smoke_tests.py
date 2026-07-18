@@ -147,13 +147,38 @@ def infer_action_type(function_name: str) -> str:
         'activate': 'activate_window',
         'transform_selection': 'transform_selection',
         'skip_clipboard_restore': 'skip_clipboard_restore',
+        'insert_raw': 'raw_insert_text',
     }
     return mapping.get(function_name, function_name)
 
 
 # Functions that don't produce action payloads (not testable via action recording)
-# These either return None (async side effects) or return data for subsequent actions
-UNTESTABLE_FUNCTIONS = {'run', 'gs', 'sleep', 'add_hint_to_stt', 'capture_clipboard', 'cursor_navigate'}
+# These either return None (async side effects) or return data for subsequent
+# actions. The second row covers Logic-side delegating actions added since the
+# original set: AI text correction, help-online browser open, Pattern Manager
+# and interaction-mode GUI-queue sends, and the click/overlay commands -- all
+# return None on every path (wh-smoke-await-mock).
+UNTESTABLE_FUNCTIONS = {
+    'run', 'gs', 'sleep', 'add_hint_to_stt', 'capture_clipboard', 'cursor_navigate',
+    'fix_text_ai', 'cancel_fix', 'wheelhouse_help', 'wheelhouse_help_online',
+    'open_pattern_manager', 'set_speech_interaction_mode',
+    'click_element', 'show_overlay_command', 'hide_overlay_command',
+}
+
+
+def is_testable_action(action: dict) -> bool:
+    """True if the action produces a payload MockApp can record.
+
+    Excludes the UNTESTABLE_FUNCTIONS set and the empty-template text('')
+    form, which silently consumes matched text (non-speech sounds,
+    assistant-filter patterns like "okay Google") and returns None.
+    """
+    function = action.get('function', '')
+    if function in UNTESTABLE_FUNCTIONS:
+        return False
+    if function == 'text' and action.get('params') == ['']:
+        return False
+    return True
 
 
 def generate_smoke_tests():
@@ -231,11 +256,18 @@ def generate_smoke_tests():
         if not actions:
             continue
 
+        # Trailing-position patterns (wh-2vz) fire via the trailing-command
+        # mechanism, not TextParser.parse_and_execute -- the catalog keeps
+        # them out of get_all_patterns(), so a parse-based smoke test can
+        # never match them. Skip.
+        if pattern_data.get('position') == 'trailing':
+            continue
+
         # Generate test input and track captured groups
         test_input, group_values = parse_pattern_groups(pattern_str)
 
         # Check if pattern has testable actions (ones that produce action payloads)
-        testable_actions = [a for a in actions if a.get('function', '') not in UNTESTABLE_FUNCTIONS]
+        testable_actions = [a for a in actions if is_testable_action(a)]
         has_testable_actions = len(testable_actions) > 0
 
         if has_testable_actions:
@@ -247,8 +279,11 @@ def generate_smoke_tests():
 
             # `press_keys` consumes natural-language key phrases and normalizes them
             # into key lists (e.g., "control c" -> ["ctrl", "c"]). Use a valid
-            # key phrase here instead of generic free text.
-            if function_name == "press_keys" and pattern_str == r"^press (.+)$":
+            # key phrase here instead of generic free text. Match on the
+            # pattern PREFIX, not an exact literal -- the shipped pattern
+            # drifted from "^press (.+)$" to "^press\\s*(.+)$" and an exact
+            # comparison silently stopped firing (wh-smoke-await-mock).
+            if function_name == "press_keys" and pattern_str.startswith("^press"):
                 test_input = "press control c"
                 group_values["g1"] = "control c"
         else:
@@ -333,11 +368,16 @@ def generate_smoke_tests():
         if not actions:
             continue
 
+        # Trailing-position patterns (wh-2vz) are unreachable via
+        # parse_and_execute -- same skip as the command loop.
+        if pattern_data.get('position') == 'trailing':
+            continue
+
         # Generate test input and track captured groups
         test_input, group_values = parse_pattern_groups(pattern_str)
 
         # Check if pattern has testable actions (ones that produce action payloads)
-        testable_actions = [a for a in actions if a.get('function', '') not in UNTESTABLE_FUNCTIONS]
+        testable_actions = [a for a in actions if is_testable_action(a)]
         has_testable_actions = len(testable_actions) > 0
 
         if has_testable_actions:
@@ -466,7 +506,7 @@ def generate_e2e_tests(patterns_file=None, output_file=None):
             continue
 
         # Determine what the command should produce
-        testable_actions = [a for a in actions if a.get('function', '') not in UNTESTABLE_FUNCTIONS]
+        testable_actions = [a for a in actions if is_testable_action(a)]
         if not testable_actions:
             expected_type = 'side_effect'
         else:

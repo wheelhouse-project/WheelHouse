@@ -2,9 +2,10 @@
 
 ## Instructions for AI Assistant
 
-You are a friendly, patient WheelHouse support assistant. Your job is to help
-users understand and use WheelHouse, a voice-controlled desktop automation
-system for Windows.
+You are a friendly, patient WheelHouse support assistant. You help two kinds
+of people: current users of WheelHouse, and people who have not installed it
+yet and are deciding whether to try it. WheelHouse is a voice-controlled
+desktop automation system for Windows.
 
 Behavior rules:
 - Match your depth to the question. Simple question = simple answer. Technical
@@ -12,12 +13,25 @@ Behavior rules:
 - If the user seems non-technical, avoid jargon. Use analogies.
 - If unsure whether the user wants a quick or detailed answer, ask:
   "Would you like a quick answer or a deeper explanation?"
+- For someone deciding whether to install: answer honestly from the "What Is
+  WheelHouse", "Can My Computer Handle WheelHouse", "Speech Engines and
+  Accounts", and "Getting Started" sections. Be candid about hardware limits
+  and rough edges. Never oversell.
 - For WheelHouse-specific questions: answer ONLY from this document. Never
   invent features, commands, or settings not documented here.
 - For general computing questions (microphone setup, Windows settings,
   PowerShell basics): help freely using your general knowledge.
 - If the answer isn't in this document: "I don't have information about that
-  feature. You can reach the developer at the WheelHouse GitHub page: https://github.com/wheelhouse-project/WheelHouse (open an issue or start a discussion)."
+  feature. You can reach the developer at the WheelHouse GitHub page:
+  https://github.com/wheelhouse-project/WheelHouse (open an issue or start
+  a discussion)."
+- This document contains HTML comment lines such as <!-- install-doc:start -->.
+  They are structural markers for tooling. Ignore them and never mention them.
+- If an answer could depend on the WheelHouse version (behavior that changed,
+  download sizes, feature availability), tell the user which release this
+  document describes -- read it from the "Generated" line in the footer at
+  the very end ("for the vX.Y.Z release"). Ignore the footer's "WheelHouse
+  version" line; it is an internal build identifier.
 - When describing voice commands, always give an example of what to say.
 - When a user seems overwhelmed, direct them to the "Day 1 Quick Start" section
   and tell them to ignore everything else until they're comfortable.
@@ -82,6 +96,8 @@ Once the basics work, pick the path that matches what you want to do next.
 
 ## Getting Started (Full Version)
 
+<!-- install-doc:start -->
+
 ### Installation
 
 You do not need to install anything ahead of time -- no programming tools, no separate downloads. One command does the whole job. Open any PowerShell window (press the Windows key, type "powershell", press Enter) and run:
@@ -93,7 +109,7 @@ irm https://github.com/wheelhouse-project/WheelHouse/releases/latest/download/in
 The whole process takes about 10 to 20 minutes, most of it downloading (roughly 1 GB in total). In plain language, the installer:
 
 1. Checks that your computer meets the requirements (see below) and tells you clearly if something is missing.
-2. Installs uv, the environment manager WheelHouse uses. Nothing is installed system-wide; everything lives inside WheelHouse's own folder.
+2. Installs uv, the environment manager WheelHouse uses, into your user profile and adds it to your user PATH -- nothing system-wide. The Python environments uv builds live inside WheelHouse's own folder.
 3. Downloads the WheelHouse application and verifies the download is genuine and undamaged.
 4. Sets up WheelHouse's own private Python environments -- these are self-contained and cannot interfere with anything else on your computer.
 5. Asks which speech engine you want (the default answer is right for almost everyone -- see Speech Engines and Accounts below).
@@ -106,7 +122,7 @@ WheelHouse installs for your user account only. No administrator rights are need
 
 - Windows 10 or 11, 64-bit (Windows 11 any edition; most Windows 10 editions work too)
 - 10 GB of free disk space
-- 8 GB of memory (RAM) -- this is a hard minimum for the built-in offline speech engine; 16 GB is recommended. Below 8 GB the installer stops and suggests the Google Cloud engine, which runs in the cloud and needs far less memory.
+- 8 GB of memory (RAM) -- a hard minimum; 16 GB is recommended. Below 8 GB the installer stops and cannot proceed with any speech engine, including the cloud one.
 - 4 or more CPU cores recommended -- with fewer, WheelHouse still installs, but speech recognition may respond slowly
 - A microphone (you can plug one in after installing)
 - An internet connection for the install itself; the default speech engine works fully offline after that
@@ -120,7 +136,7 @@ The installer reports each step as it goes. If it reached the speech-engine ques
 Every failure message the installer prints is designed to be understandable and safe to share. The common ones:
 
 - **"WheelHouse appears to be running"** (during an update): the installer refuses to replace an app that is running. Exit WheelHouse first -- right-click the WheelHouse tray icon and choose Exit -- then run the installer again. If it says it could not even check whether WheelHouse is running, close WheelHouse or restart the computer, then try again.
-- **"This computer has N GB of memory"**: your machine is below the 8 GB minimum for the offline speech engine. Choose the Google Cloud engine instead (it needs far less memory), or add memory.
+- **"This computer has N GB of memory"**: your machine is below the 8 GB minimum. This check stops the install for every speech engine, including the cloud one, so adding memory is the only fix.
 - **"Not enough free disk space"**: free up 10 GB on the Windows drive and run the installer again.
 - **"tar.exe was not found"**: only affects Windows 10 versions from before 2018, which lack the tool that unpacks the speech model. Install tar yourself, or choose the Google Cloud engine (which needs no model download).
 - **"Could not install uv"**: usually a blocked network -- corporate proxies can block the download. Install uv manually from https://docs.astral.sh/uv/getting-started/installation/ and run the installer again.
@@ -132,46 +148,111 @@ Every failure message the installer prints is designed to be understandable and 
 
 **Re-running the installer is always safe.** It repairs a broken install, resumes interrupted downloads, and updates an existing install while preserving your settings, your personal voice patterns, your approved dictation targets, your saved speech hints, and the downloaded speech model. You cannot make things worse by running it again -- when in doubt, re-run it.
 
-### Uninstalling
-
-The installer is also the uninstaller. Download the same install-wheelhouse.ps1 file from the releases page, then run it in PowerShell with the -Uninstall option (the one-line install command cannot pass options, so uninstalling needs the downloaded file). It asks you to confirm before removing anything, and asks separately whether to keep or remove your personal settings and voice patterns.
+<!-- install-doc:end -->
 
 If none of that helps, ask for help at https://github.com/wheelhouse-project/WheelHouse -- paste the installer's output into your report.
 
+<!-- install-doc:start -->
+
+### Updating WheelHouse
+
+There is no separate update procedure: **updating IS re-running the installer.** Run the same one-line command from the Installation section. The command always fetches the newest release, and when the installer finds WheelHouse already on your computer, it updates it in place. Exit WheelHouse first (right-click the WheelHouse tray icon and choose Exit) -- the installer refuses to replace an app that is running.
+
+An update replaces the application but keeps everything that is yours:
+
+- Your settings (the config.toml file)
+- Your personal voice patterns
+- The dictation targets you have approved or declined
+- Your saved speech hints
+- The downloaded speech model -- it is stored outside the part an update replaces, so the roughly 650 MB download does not repeat
+
+**If an update is interrupted** -- a power cut, a closed window, a crash -- your personal files are safe. Before replacing anything, the installer copies them into a holding folder next to the application, and the next run restores whatever it finds there. Recovery is simply running the same command again; nothing manual is needed.
+
+<!-- install-doc:end -->
+
+<!-- install-doc:start -->
+
+### Security warnings you may see
+
+WheelHouse is currently unsigned -- there is no code-signing certificate yet -- so Windows may warn you when you download or run it. These warnings are about the missing signature, not about anything the software does. The complete source code is public at https://github.com/wheelhouse-project/WheelHouse, so anyone can inspect exactly what it does.
+
+- **SmartScreen ("Windows protected your PC")**: appears when you run the downloaded WheelHouse-Setup.exe. Click "More info", then "Run anyway". This is the standard Windows notice for any downloaded program that is not signed. If the setup wizard later runs into trouble, it always writes a log file at `%TEMP%\Setup Log <date> #<number>.txt` -- paste that into a help request.
+- **Antivirus flags or rewrites the download**: some antivirus products quarantine downloads or alter them as they arrive. The installer checks every file it downloads against a published fingerprint and refuses anything that does not match, so a changed file cannot be installed -- instead you see a message saying a download "failed its integrity check". An antivirus or proxy altering the file is the most common cause. Add an exception for WheelHouse, or install on a different network, then run the installer again.
+- **A downloaded script will not run**: if you saved install-wheelhouse.ps1 as a file (for example, to uninstall) instead of using the one-line command, Windows marks the file as coming from the internet and PowerShell may refuse to run it. Two equally good fixes: remove the mark once with `Unblock-File .\install-wheelhouse.ps1`, or start it with `powershell -ExecutionPolicy Bypass -File .\install-wheelhouse.ps1`.
+
+If you would rather not click through security warnings at all, there is an alternative: read the code and install from source. The CONTRIBUTING.md file in the GitHub repository has the development setup steps.
+
+<!-- install-doc:end -->
+
+<!-- install-doc:start -->
+
+### Uninstalling WheelHouse
+
+The installer is also the uninstaller. The one-line install command cannot pass options, so uninstalling needs the script as an actual file: download the same install-wheelhouse.ps1 from the releases page, open PowerShell in the folder where you saved it, and run:
+
+```
+powershell -ExecutionPolicy Bypass -File install-wheelhouse.ps1 -Uninstall
+```
+
+The uninstaller will not run while WheelHouse is running -- exit it first (right-click the WheelHouse tray icon and choose Exit). It then asks two questions before touching anything:
+
+1. **"Remove WheelHouse from this computer?"** -- nothing is removed until you type yes.
+2. **"Keep your personal data?"** -- meaning your settings, your voice patterns, and the downloaded speech model.
+
+What each answer does:
+
+- **If you keep your personal data:** the application, all its shortcuts, and its technical bookkeeping folder are removed, but your settings, your personal voice patterns, and the speech model stay behind in `%LOCALAPPDATA%\WheelHouse` (the settings and patterns are gathered into a subfolder there named preserved-user-data). If you reinstall later, the installer starts fresh -- copy files back from that folder if you want your old settings and patterns again.
+- **If you keep nothing:** everything is removed -- the entire `%LOCALAPPDATA%\WheelHouse` folder and the `%APPDATA%\WheelHouse` folder, plus all shortcuts (Start menu, desktop, and the start-at-login entry). If you had set up a cloud AI access key, the uninstaller also clears it from your user environment.
+
+For the privacy-minded: those two folders are the only places WheelHouse lives, and `%APPDATA%\WheelHouse` never holds personal data (only technical bookkeeping such as helper-process ID files) -- it is removed either way. When the uninstaller finishes, it prints both folder paths so you can check for leftovers yourself.
+
+<!-- install-doc:end -->
+
+<!-- install-doc:start -->
+
+### When WheelHouse cannot type: administrator windows and UAC prompts
+
+WheelHouse installs for your user account only and runs without administrator rights. That is deliberate, and it is good for your safety: a program with no administrator power cannot change system files or settings, and nothing it types or clicks on your behalf can go further than your own account is allowed to go.
+
+The trade-off is one Windows rule you will occasionally run into. Windows does not allow a normal program to send keystrokes or clicks into a program that is running as administrator. This is a protection built into Windows itself -- it stops any non-administrator software, not just WheelHouse, from pressing buttons in privileged windows. In practice it means two things:
+
+- **Programs running as administrator.** If you started a program with "Run as administrator" (or it elevated itself, as some system tools do), WheelHouse cannot type into it, press keys in it, or click its buttons.
+- **UAC prompts.** The dimmed "Do you want to allow this app to make changes to your device?" screen is even more protected: Windows shows it on a separate secure desktop that no ordinary program can reach or even see.
+
+**What it looks like:** for dictation and keystroke commands, nothing -- you speak and the words simply have no effect in that window, with no error message. Click commands do show a notice: WheelHouse cannot see inside the protected window, so "click cancel" reports no match. If WheelHouse suddenly seems to have stopped working, check whether the window you are in is running as administrator. Click into any normal window (Notepad, your browser) and WheelHouse works there immediately, because WheelHouse itself never stopped -- only that one window was out of reach.
+
+**What to do:**
+
+- Use your physical keyboard and mouse for the administrator window or the UAC prompt, then go back to voice for everything else.
+- If the program does not actually need administrator rights, start it the normal way (without "Run as administrator"). WheelHouse can then type into it like any other program. Some tools genuinely require administrator rights and will not run unelevated -- for those, keyboard and mouse are the answer.
+
+No WheelHouse setting can lift this limit. It is enforced by Windows, not by WheelHouse, and it protects you against far worse than a missed dictation.
+
+<!-- install-doc:end -->
+
 ### First run
 
-When you start WheelHouse, several separate programs come up together as a team:
-
-- **The launcher** -- the piece you actually started. It supervises the others and restarts them if one crashes.
-- **The logic process** -- the brain. It decides what your speech means and routes it to the right action.
-- **The input process** -- the fingers. It types text, presses keys, and clicks for you.
-- **The GUI process** -- the WheelHouse icon in the system tray and the small floating status button.
-- **The speech engine** -- runs as its own helper program, turning your voice into text.
-
-Within a few seconds you should see the WheelHouse icon in the system tray (the area near the clock). If it does not appear, see Troubleshooting.
+When you start WheelHouse, several separate programs come up together as a team: **the launcher** (the piece you actually started -- it supervises the others and restarts them if one crashes), **the logic process** (the brain: decides what your speech means and routes it to the right action), **the input process** (the fingers: types text, presses keys, and clicks for you), **the GUI process** (the tray icon and the small floating status button), and **the speech engine** (its own helper program, turning your voice into text). Within a few seconds you should see the WheelHouse icon in the system tray (the area near the clock). If it does not appear, see Troubleshooting.
 
 ### Microphone verification
 
 Before judging WheelHouse, make sure Windows itself can hear your microphone. Three quick checks, in order:
 
 1. **The privacy setting first.** Open Settings > Privacy and security > Microphone, and make sure "Let desktop apps access your microphone" is on. This one switch silently blocks everything if it is off.
-2. **The input meter.** Right-click the speaker icon in your taskbar, choose Sound settings, and scroll to Input. Your microphone should be selected, and when you speak, the level meter should bounce. If it stays flat, pick a different input device or plug in a different microphone.
+2. **The input meter.** Right-click the taskbar speaker icon, choose Sound settings, and scroll to Input: your microphone should be selected, and the level meter should bounce when you speak. If it stays flat, pick a different input device or microphone.
 3. **The Notepad test.** Open Notepad, make sure WheelHouse is listening, and say "hello world". On a modern computer the words should appear within about two seconds.
 
 ### The hotword ("x-ray")
 
-Some commands could do real damage if they fired by accident while you were dictating a sentence -- closing a window, for example. WheelHouse protects those commands with a hotword: they only run when the utterance starts with the word "x-ray".
-
-- Say "close window" -> nothing dangerous happens; the words are treated as ordinary dictation.
-- Say "x-ray close window" -> the active window closes.
-
-Harmless everyday commands like "undo", "copy", and "select all" do not need the hotword. The Voice Commands section marks the commands that require it.
+Some commands could do real damage if they fired by accident while you were dictating a sentence -- closing a window, for example. WheelHouse protects those commands with a hotword: they only run when the utterance starts with the word "x-ray". Say "close window" and nothing dangerous happens -- the words are ordinary dictation; say "x-ray close window" and the active window closes. Harmless everyday commands like "undo", "copy", and "select all" do not need the hotword; the Voice Commands section marks the ones that do.
 
 ### The wake word ("computer")
 
-If you are quiet for a while, WheelHouse can pause its listening to save effort. Saying "computer" wakes it back up -- no keyboard or mouse needed, which matters if you rely on hands-free control. The wake word and the hotword are different things: "computer" resumes listening after an idle pause, while "x-ray" unlocks protected commands. Wake-word behavior can be tuned in the settings file (the wake_word section); it is on by default.
+If you are quiet for a while, WheelHouse can pause its listening to save effort. Saying "computer" wakes it back up -- no keyboard or mouse needed, which matters for hands-free control. The wake word and the hotword are different things: "computer" resumes listening after an idle pause, while "x-ray" unlocks protected commands. Wake-word behavior can be tuned in the settings file (the wake_word section); it is on by default.
 
 ---
+
+<!-- install-doc:start -->
 
 ## Speech Engines and Accounts
 
@@ -179,7 +260,7 @@ If you are quiet for a while, WheelHouse can pause its listening to save effort.
 
 Most users need no account of any kind. WheelHouse ships with the **Parakeet** engine as its default: it runs entirely on your own computer, on the regular processor (CPU), works offline, costs nothing, and never sends your audio anywhere. The installer downloads its model for you, and it is preselected in your settings from the start.
 
-The one situation where an account comes up: a computer with less than 8 GB of memory cannot run the offline engine usefully, so the installer suggests the **Google Cloud** engine instead. That engine processes your speech on Google's servers and needs a free Google Cloud account plus a one-time credentials setup (Google charges for heavy use beyond its free tier, but most personal use stays within it). If your machine meets the 8 GB minimum, you can ignore Google entirely.
+The one situation where an account comes up: you picked the **Google Cloud** speech engine at the installer's speech-engine question. That engine processes your speech on Google's servers and needs a free Google Cloud account plus a one-time credentials setup (Google charges for heavy use beyond its free tier, but most personal use stays within it). One caveat: on a computer with less than 8 GB of memory, the installer stops before installing anything -- its closing message mentions the cloud engine, but the installer cannot yet set it up on such a machine, so the fix is adding memory or using another computer.
 
 There is also a third option for computers with an NVIDIA graphics card that has at least 4 GB of dedicated memory: **Distil-Whisper**, which runs locally on the graphics card. The installer offers it only when it detects a suitable card. It downloads its own model the first time it starts, so the first launch takes a few minutes.
 
@@ -196,7 +277,9 @@ There is also a third option for computers with an NVIDIA graphics card that has
 
 ### Setting up Google Cloud credentials (only if you chose that engine)
 
-The Google Cloud engine cannot hear you until it has credentials. This is the one engine that requires technical setup:
+You need this section only if you picked the **Google Cloud** speech engine at the installer's speech-engine question. If you use the default Parakeet engine, skip this section entirely: it needs no account and no credentials.
+
+If you chose Google Cloud, the installer ended with a warning that the engine needs credentials before it can hear you, and pointed you to "the Google Cloud section" -- this is that section. The account itself is free, and most personal use stays within Google's free tier (Google charges for heavy use beyond it).
 
 1. Create a Google Cloud account and a project at https://console.cloud.google.com/.
 2. In the project, enable the Cloud Speech-to-Text API.
@@ -206,11 +289,21 @@ The Google Cloud engine cannot hear you until it has credentials. This is the on
 6. Press the Windows key, type "environment variables", open "Edit environment variables for your account", and add a new variable named GOOGLE_APPLICATION_CREDENTIALS whose value is the full path to that file.
 7. Restart WheelHouse if it is running.
 
-### Switching engines
+That GOOGLE_APPLICATION_CREDENTIALS variable is where WheelHouse expects to find the file: Google's own software reads it automatically, so there is nothing to edit inside WheelHouse itself.
 
-The easiest way: right-click the WheelHouse icon in the system tray, open **STT Provider**, and pick the engine you want. WheelHouse remembers your choice (it is stored as last_provider in the stt section of the settings file) and uses it the next time it starts.
+<!-- install-doc:end -->
 
-If the engine you want was never set up on this machine -- for example you originally chose Google Cloud and now want Parakeet -- re-run the installer and pick the engine at its speech-engine question; it downloads whatever that engine needs.
+<!-- install-doc:start -->
+
+### Adding or switching engines later
+
+To switch between engines that are already set up on this computer, use the system tray: right-click the WheelHouse icon, open **STT Provider**, and pick the engine you want. WheelHouse remembers your choice (it is stored as last_provider in the stt section of the settings file) and uses it the next time it starts. If you switch to Google Cloud this way, remember that it cannot hear you until its credentials are set up -- see the Google Cloud section above.
+
+To add an engine that was never set up on this machine, re-run the installer and pick that engine at its speech-engine question; it downloads and sets up whatever the engine needs. For example, if you originally chose Google Cloud and now want Parakeet, the re-run is what downloads Parakeet's speech model -- picking it from the tray menu is not enough on its own. The Distil-Whisper engine is always added this way: the installer sets it up only when you choose it, and offers it only on a computer with a suitable NVIDIA graphics card.
+
+The same re-run is the repair path when the speech model is missing or incomplete -- for example when its download was skipped or interrupted the first time. The installer notices an incomplete model and reinstalls it. Re-running the installer is always safe, and on a re-run the speech-engine question defaults to the engine you already have, so pressing Enter keeps it (if your current engine is no longer available on this computer's hardware, the installer says so before asking).
+
+<!-- install-doc:end -->
 
 ---
 
@@ -222,7 +315,7 @@ An honest answer, because nothing is worse than installing something and finding
 
 - Windows 10 or Windows 11, 64-bit
 - A dual-core processor -- WheelHouse will install and run, but speech recognition may respond slowly; 4 or more cores is the comfortable floor
-- 8 GB of RAM -- a hard minimum for the built-in offline speech engine; below it, the installer stops and points you to the cloud engine instead
+- 8 GB of RAM -- a hard minimum; below it, the installer stops and cannot proceed with any speech engine, including the cloud one
 - 10 GB of free disk space
 - An SSD is strongly recommended -- on an old spinning hard drive, startup and first responses are noticeably slower
 - A working microphone
@@ -260,12 +353,9 @@ Where a GPU helps most is on a machine whose processor is older or slower: if yo
 
 ## Voice Commands
 
-WheelHouse turns what you say into keystrokes, text, and system actions. Most commands work without any prefix, but some powerful or destructive commands require you to start with the hotword **"x-ray"** so they cannot fire accidentally while you are dictating normal text. Commands that need the hotword are shown with an "x-ray" prefix in the tables below; everything else works bare.
+WheelHouse turns what you say into keystrokes, text, and system actions. Most commands work without any prefix, but some powerful or destructive commands require the hotword **"x-ray"** first so they cannot fire accidentally while you dictate; those are shown with an "x-ray" prefix in the tables below.
 
-Two kinds of voice patterns exist, and it helps to know the difference:
-
-- **Commands** do something: press a key, switch a window, click a button. Most must be spoken as their own utterance (say the command, then pause).
-- **Replacements** work **inline during dictation**: you say them in the middle of a sentence and WheelHouse swaps the spoken word for a symbol or corrected text as it types. All of the punctuation words ("period", "comma", "question mark") work this way -- you never have to stop dictating to punctuate.
+Two kinds of voice patterns exist: **commands** do something (press a key, switch a window, click a button) and are mostly spoken as their own utterance -- say the command, then pause -- while **replacements** work **inline during dictation**: say them mid-sentence and WheelHouse swaps the spoken word for a symbol or corrected text as it types. All of the punctuation words ("period", "comma", "question mark") work this way -- you never stop dictating to punctuate.
 
 ### Top 10 Commands to Learn First
 
@@ -311,7 +401,7 @@ These commands control what WheelHouse types and give you escape hatches when a 
 | item [number] | Inserts a numbered list marker like "1." | e.g. "item 1", "item 5" |
 | submit | Presses Enter | Also works as the last word of a sentence: "hello world submit" types "hello world" and then presses Enter. To type the word itself, say "literal submit" |
 
-One background protection worth knowing about: utterances that begin with "okay Google", "ok Google", or "hey Google" are silently discarded. If you talk to a nearby voice assistant while WheelHouse is listening, that cross-talk is not typed into your document.
+One background protection worth knowing about: utterances beginning with "okay Google", "ok Google", or "hey Google" are silently discarded, so talking to a nearby voice assistant while WheelHouse is listening is not typed into your document.
 
 #### Text Editing
 
@@ -319,17 +409,13 @@ One background protection worth knowing about: utterances that begin with "okay 
 
 | Say this | What happens | Notes |
 |---|---|---|
-| backspace | Deletes one character to the left | |
-| backspace [number] | Deletes that many characters to the left | e.g. "backspace 5"; counts are capped at 50 |
-| delete | Deletes one character to the right | |
-| delete [number] | Deletes that many characters to the right | e.g. "delete 5"; counts are capped at 50 |
+| backspace [number] | Deletes one character to the left, or that many with a number | e.g. "backspace 5"; the number is optional, counts capped at 50 |
+| delete [number] | Deletes one character (or that many) to the right | e.g. "delete 5"; counts capped at 50 |
 | delete word | Deletes the entire word under the cursor | |
-| undo | Undoes the last action (Ctrl+Z) | |
-| undo [number] | Undoes multiple steps | e.g. "undo 3" |
-| redo | Redoes the last undone action (Ctrl+Y) | |
-| redo [number] | Redoes multiple steps | |
+| undo [number] | Undoes the last action, or several | Ctrl+Z; e.g. "undo 3" |
+| redo [number] | Redoes the last undone action, or several | Ctrl+Y |
 
-WheelHouse also accepts the common ways the speech engine misspells "undo" and "redo" (heard as "undue", "undu", or "redu"), so the command still fires even when the recognizer gets the spelling wrong.
+WheelHouse also accepts common mishearings of "undo" and "redo" ("undue", "undu", "redu"), so the command still fires when the recognizer gets the spelling wrong.
 
 **Line breaks, indenting, and keys**
 
@@ -346,9 +432,7 @@ WheelHouse also accepts the common ways the speech engine misspells "undo" and "
 
 | Say this | What happens | Notes |
 |---|---|---|
-| copy | Copies the current selection | |
-| copy line | Copies the entire current line | |
-| copy all | Selects everything and copies it | |
+| copy / copy line / copy all | Copies the selection, the entire current line, or everything | |
 | copy screen | Starts the Windows screenshot snipping tool | |
 | x-ray cut | Cuts the current selection | Requires the hotword for safety |
 | paste | Pastes the clipboard contents | |
@@ -358,10 +442,7 @@ WheelHouse also accepts the common ways the speech engine misspells "undo" and "
 
 | Say this | What happens |
 |---|---|
-| select all | Selects everything in the current field |
-| select word | Selects the word under the cursor |
-| select line | Selects the current line |
-| select paragraph | Selects the current paragraph |
+| select all / select word / select line / select paragraph | Selects everything in the current field, or the word, line, or paragraph under the cursor |
 
 **Saving, finding, and searching**
 
@@ -386,7 +467,7 @@ WheelHouse also accepts the common ways the speech engine misspells "undo" and "
 
 **Digits**: a digit works only when another key name follows it. Avoid ending the phrase with a digit -- a trailing digit is read as a repeat count, so "press control 2" presses Ctrl twice instead of Ctrl+2.
 
-**Symbols by spoken name**: these symbol names are reliably pressable -- backtick, semicolon, slash (or forward slash), backslash (or back slash), comma, period (or dot), single quote (or apostrophe), left/right bracket (also accepts open/close bracket), equals (or equal), minus (also hyphen or dash), right parenthesis (or close paren). Other symbol names are not reliable in "press" and are best avoided there: the shifted symbols (colon, tilde, pipe, question mark, double quote, braces, less than, greater than, plus, underscore, left parenthesis) come out as the wrong character, and hash, at, ampersand, asterisk, caret, percent, dollar, and exclamation press nothing at all. To type any of these characters, dictate them as punctuation words instead (see Punctuation and Symbols below) -- that path handles every symbol correctly.
+**Symbols by spoken name**: reliably pressable -- backtick, semicolon, slash (forward slash), backslash (back slash), comma, period (dot), single quote (apostrophe), left/right bracket (open/close bracket), equals (equal), minus (hyphen, dash), right parenthesis (close paren). Other symbol names are unreliable in "press": shifted symbols (colon, tilde, pipe, question mark, double quote, braces, less than, greater than, plus, underscore, left parenthesis) come out as the wrong character, and hash, at, ampersand, asterisk, caret, percent, dollar, and exclamation press nothing. To type any of these characters, dictate them as punctuation words instead (see Punctuation and Symbols below) -- that path handles every symbol correctly.
 
 **Examples**: "press control shift t", "press f5", "press alt f4", "press windows d", "press left bracket".
 
@@ -398,39 +479,32 @@ All of these apply to whatever text is currently selected. Select first (with th
 
 | Say this | What happens |
 |---|---|
-| uppercase | Converts the selection to UPPERCASE |
-| lowercase | Converts the selection to lowercase |
+| uppercase / lowercase | Converts the selection to UPPERCASE or lowercase |
 | capitalize | Capitalizes the first letter and lowercases the rest |
 | title case | Converts the selection to Title Case |
-| snake case | Converts the selection to snake_case |
-| camel case | Converts the selection to camelCase |
-| pascal case | Converts the selection to PascalCase |
-| kebab case | Converts the selection to kebab-case |
+| snake case / camel case / pascal case / kebab case | Converts the selection to that programming style: snake_case, camelCase, PascalCase, or kebab-case |
 | compress | Removes the spaces, joining the words together ("hello world" becomes "helloworld") |
 
 **Rich text styling**
 
 | Say this | What happens | Notes |
 |---|---|---|
-| x-ray bold text | Bolds the selection (Ctrl+B) | Works in apps that support rich text |
-| x-ray italics | Italicizes the selection (Ctrl+I) | |
-| x-ray underline | Underlines the selection (Ctrl+U) | |
+| x-ray bold text / x-ray italics / x-ray underline | Bolds, italicizes, or underlines the selection (Ctrl+B / Ctrl+I / Ctrl+U) | Works in apps that support rich text |
 
 **Wrapping**
 
-These wrap your selection in the chosen characters. Said with no selection, they insert an empty pair and drop your cursor between the two characters -- handy while dictating code. You can also say them followed by the text you want wrapped.
+These wrap your selection in the chosen characters. Said with no selection, they insert an empty pair and drop your cursor between the two characters -- handy while dictating code.
 
 | Say this | What happens |
 |---|---|
-| parentheses | Wraps the selection in ( ) or inserts an empty ( ) pair |
-| parentheses hello | Inserts "(hello)" |
+| parentheses [text] | Wraps the selection in ( ), inserts an empty ( ) pair, or inserts the spoken text wrapped ("parentheses hello" gives "(hello)") |
 | brackets | Wraps in [ ] |
 | braces | Wraps in { } |
 | angle brackets | Wraps in < > |
 | quotes | Wraps in double quotes |
 | single quotes | Wraps in single quotes |
 
-Note: when you say a wrapping word followed by more words in the same breath, those words are wrapped verbatim -- symbol words like "colon" spoken inside the wrapped text are typed literally, not converted.
+Note: words spoken after a wrapping word in the same breath are wrapped verbatim -- symbol words like "colon" inside the wrapped text are typed literally, not converted.
 
 #### Navigation
 
@@ -442,25 +516,19 @@ The "go" and "grab" commands move the cursor without touching the keyboard. "go"
 | go end | Jumps to the end of the line |
 | go top | Jumps to the top of the document |
 | go bottom | Jumps to the bottom of the document |
-| go left / go right | Moves one character |
-| go left 5 / go right 5 | Moves five characters |
-| go right 3 words | Moves three words to the right |
-| go left 2 paragraphs | Moves two paragraphs up |
-| go start of word | Jumps to the start of the current word ("beginning of word" also works) |
-| go end of word | Jumps forward past the current word (in most apps the cursor lands at the start of the next word) |
-| go start of paragraph | Jumps to the start of the current paragraph |
-| go end of paragraph | Jumps forward to the next paragraph (in most apps the cursor lands just past the end of the current one) |
-| go home then grab to end | Jumps to the line start, then selects to the line end |
-| go end then grab to home | Jumps to the line end, then selects back to the line start |
+| go left / go right [count] | Moves one character, or a count ("go right 5") |
+| go left / go right [count] words / paragraphs | Moves by words or paragraphs ("go right 3 words", "go left 2 paragraphs") |
+| go start of word / go end of word | Jumps to the start of the current word ("beginning of word" also works), or forward past it (in most apps the cursor lands at the start of the next word) |
+| go start of paragraph / go end of paragraph | Jumps to the start of the current paragraph, or forward to the next one (landing just past the end of the current one in most apps) |
+| go home then grab to end | Jumps to the line start, then selects to the line end ("go end then grab to home" selects the same span from the other side) |
 | go home then grab right 3 words | Selects the first three words of the line |
-| go end then grab left 5 | Selects the last five characters of the line |
 | go top then grab to bottom | Selects the entire document |
 
 Counts can be digits ("3") or spoken words ("one" through "ten"; digits work up to 50). "to", "too", and "for" are accepted as sound-alikes for 2 and 4, so a recognizer that hears "go right to words" still moves two words. If any part of a "go" utterance cannot be understood, the whole phrase is typed as dictation instead -- garbled speech never produces surprise cursor movement.
 
 #### Punctuation and Symbols
 
-These are replacements: they work **inline during dictation**. Just say the word as part of your sentence and WheelHouse types the symbol in its place. You do not need to pause or say them as a separate command.
+These are replacements: they work **inline during dictation** -- say the word as part of your sentence and WheelHouse types the symbol in its place, no pause needed.
 
 | Say this | You get |
 |---|---|
@@ -493,13 +561,13 @@ These are replacements: they work **inline during dictation**. Just say the word
 
 Two mishear tolerances ship built in, because the default local engine often mishears the spoken words "comma" and "colon": saying **"colin"** as an entire utterance inserts ":", and saying **"come"**, **"kama"**, **"commer"**, or **"come on"** as an entire utterance inserts ",". Inside a longer sentence these words dictate normally -- the tolerance applies only when the word is the whole utterance. To type one of them as a standalone word, use the escape hatch: "literal come" / "literal colin".
 
-If the speech recognizer routinely mishears any other word -- for example a name heard as a sound-alike -- you can teach WheelHouse a personal correction in the Pattern Manager (say "x-ray patterns"). Your correction then applies inline during dictation, exactly like the built-in punctuation words.
+If the recognizer routinely mishears another word -- a name heard as a sound-alike, say -- teach WheelHouse a personal correction in the Pattern Manager ("x-ray patterns"); it then applies inline during dictation like the built-in punctuation words.
 
 #### Application Switching
 
 | Say this | What happens | Notes |
 |---|---|---|
-| x-ray activate [app name] | Brings the named application's window forward if the app is already running; a spoken name does not start an app that is closed (only .exe targets used in custom patterns are launched when not found) | e.g. "x-ray activate outlook", "x-ray activate code" |
+| x-ray activate [app name] | Brings the named application's window forward if it is already running (a spoken name does not start a closed app; only .exe targets in custom patterns are launched when not found) | e.g. "x-ray activate outlook" |
 | x-ray browser | Brings your default web browser to the front | WheelHouse looks up which browser is your Windows default at the moment you speak |
 | x-ray notepad | Brings Notepad to the front | |
 
@@ -509,24 +577,17 @@ Window management and Windows itself.
 
 | Say this | What happens | Notes |
 |---|---|---|
-| zoom in | Zooms in (Ctrl and plus) | |
-| zoom out | Zooms out (Ctrl and minus) | |
+| zoom in / zoom out | Zooms in or out (Ctrl and plus / minus) | |
 | create tab | Sends Ctrl+N | New tab in most editors; note that in most browsers Ctrl+N opens a new window, not a tab |
 | create window | Sends Ctrl+Shift+N | New window in editors; opens a private/incognito window in most browsers |
 | x-ray close window | Closes the active window (Alt+F4) | Requires the hotword for safety |
-| x-ray maximize | Maximizes the active window | |
-| x-ray minimize | Minimizes the active window | |
+| x-ray maximize / x-ray minimize | Maximizes or minimizes the active window | |
 | x-ray desktop | Shows the desktop (Windows+D) | |
 | Windows settings | Opens the Windows Settings app | Also fires if heard as "Window settings" |
 
 #### Mouse Control
 
-An honest note, because many voice packages advertise this: **this release has no voice commands that move the mouse pointer** (no "mouse up", no grid overlay for pointer positioning). What WheelHouse offers instead usually covers the reasons you would want them:
-
-- **Clicking things by voice** is handled by Voice Element Clicking (the next section) -- you click a control by saying its name or its number, which is faster and more precise than steering a pointer by voice.
-- **Volume and screen brightness** are adjusted with the physical mouse thumb wheel in dedicated zones at the edges of the screen (pointer at the left edge for brightness, elsewhere for volume), not by voice. This is a deliberate design choice for people who keep one hand on a mouse or trackball.
-
-If you need full pointer-by-voice control, WheelHouse is not that tool yet -- pair it with your preferred pointer solution and let WheelHouse handle dictation, commands, and clicking by name.
+An honest note, because many voice packages advertise this: **this release has no voice commands that move the mouse pointer** (no "mouse up", no grid overlay for pointer positioning). What WheelHouse offers instead usually covers the need: clicking controls by saying their name or number (Voice Element Clicking, the next section) is faster and more precise than steering a pointer by voice, and volume and screen brightness ride the physical mouse thumb wheel in dedicated screen-edge zones (pointer at the left edge for brightness, elsewhere for volume) -- a deliberate design choice for people who keep one hand on a mouse or trackball. If you need full pointer-by-voice control, WheelHouse is not that tool yet: pair it with your preferred pointer solution and let WheelHouse handle dictation, commands, and clicking by name.
 
 #### Voice Element Clicking
 
@@ -544,14 +605,7 @@ Say "click", then the name of the control -- optionally with "the" in front (ign
 | click the file menu | Clicks the menu named "file" |
 | click remember me checkbox | Clicks the check box named "remember me" |
 
-**Role words** you can add after the name:
-
-- **button** -- a button
-- **link** -- a hyperlink
-- **menu** -- a menu item
-- **tab** -- a tab
-- **checkbox** (or **check box**) -- a check box
-- **box**, **field**, or **input** -- a text entry field
+**Role words** you can add after the name: **button**, **link** (a hyperlink), **menu** (a menu item), **tab**, **checkbox** (or **check box**), and **box** / **field** / **input** (a text entry field).
 
 If you say no role word, WheelHouse matches any clickable control by name. A role word said on its own with no name (for example "click button") is treated as the name, not a role -- it looks for a control literally named "button".
 
@@ -563,22 +617,11 @@ If you say no role word, WheelHouse matches any clickable control by name. A rol
 | click 3 | Clicks the control labelled 3 | Say any visible number |
 | dismiss numbers | Removes the numbers | |
 
-Things worth knowing about the overlay:
-
-- **The numbers stay on screen** until you say "dismiss numbers". Clicking a numbered control does not remove them -- they refresh in place so you can pick another. The numbers also follow you to whichever window is in front.
-- **If a name is ambiguous, the numbers appear by themselves.** When you say "click [name]" and more than one control matches well, WheelHouse shows numbers on just the matching finalists so you can say "click [number]" to pick the one you meant.
-- **Controls whose real name is a number.** While numbers are showing, saying a number always picks the numbered label -- so a control whose actual name is a digit (a calculator "7", for instance) cannot be reached by name until you say "dismiss numbers" first.
-- **If the numbers look out of place, say "apply numbers" again.** After a page scrolls or swaps content, the painted numbers may sit in their old spots until you repaint them.
+Things worth knowing about the overlay: the numbers **stay on screen** until you say "dismiss numbers" -- clicking a numbered control refreshes them in place so you can pick another, and they follow whichever window is in front. When a "click [name]" matches more than one control well, the numbers appear by themselves on just those finalists so you can pick by number. While numbers are showing, saying a number always picks the numbered label -- so a control whose real name is a digit (a calculator "7", for instance) cannot be reached by name until you say "dismiss numbers" first. And if the numbers look out of place after a page scrolls or swaps content, say "apply numbers" again to repaint them.
 
 **What you see for each outcome**
 
-A successful click shows no notice -- the control is simply clicked. The other outcomes show a brief advisory notice near the tray so you know why nothing happened:
-
-- **Not found**: "No match for [name]" -- nothing on screen matched the name you said. Try the numbered overlay.
-- **Ambiguous**: the numbered overlay opens on the finalists so you can pick by number. The "Found [A] and [B] -- be more specific" notice appears instead only when the overlay cannot open.
-- **Could not complete the click**: the wording names the reason, for example that the control is disabled, that the click timed out, or that the numbered overlay went stale and needs to be reapplied.
-
-These notices are rate-limited, so a burst of failed attempts will not bury your screen in messages.
+A successful click shows no notice -- the control is simply clicked. Failures show a brief advisory notice near the tray so you know why nothing happened: **not found** ("No match for [name]" -- nothing matched; try the numbered overlay), **ambiguous** (the numbered overlay opens on the finalists so you can pick by number; the "Found [A] and [B] -- be more specific" notice appears only when the overlay cannot open), and **could not complete the click** (the wording names the reason -- the control is disabled, the click timed out, or the overlay went stale and needs reapplying). Notices are rate-limited, so a burst of failed attempts will not bury your screen in messages.
 
 #### WheelHouse Control
 
@@ -596,46 +639,27 @@ Commands that steer WheelHouse itself: listening modes, help, personal patterns,
 
 Turning the microphone on and off is not itself a voice command -- you click the floating microphone button or the tray icon (or, in push-to-talk mode, hold it). This is deliberate: a system that could be silenced by voice could also be silenced by a stray phrase.
 
-About help: "wheelhouse help online" is the supported way to ask questions -- it opens the hosted help page in your browser. WheelHouse also contains an in-app help chat window, but the in-app help chat is currently disabled in this release because its answers did not meet quality standards; the voice patterns that opened it are switched off. Text correction ("x-ray fix") is the live AI feature of this release.
+About help: "wheelhouse help online" is the supported way to ask questions -- it opens the hosted help page in your browser. WheelHouse also contains an in-app help chat window, but the in-app help chat is currently disabled in this release; the voice patterns that opened it are switched off. Text correction ("x-ray fix") is the live AI feature of this release.
 
 ### Special Commands with Extra Explanation
 
 **"literal [words]"**
 
-Say "literal" followed by whatever you want to type, and WheelHouse inserts those exact words without running them through any command or replacement patterns. This is the escape hatch when you need to dictate a phrase that would otherwise trigger a command.
-
-- Saying "copy" normally triggers the copy command, but "literal copy" just types the word "copy".
-- "literal period" types the word "period" instead of a full stop.
-- "literal new line" types the phrase "new line" instead of inserting a line break.
+Say "literal" followed by whatever you want to type, and WheelHouse inserts those exact words without running them through any command or replacement patterns. This is the escape hatch when you need to dictate a phrase that would otherwise trigger a command: "literal copy" types the word "copy" instead of copying, "literal period" types the word instead of a full stop, and "literal new line" types the phrase instead of inserting a line break.
 
 "literal" takes effect wherever it appears in an utterance, not only as the first word: everything you say after "literal" is typed exactly as spoken, and the word "literal" itself is not typed. A sentence with "literal" in the middle therefore types the rest of that sentence verbatim, so use it only when you actually want the escape hatch. To type the word "literal" itself, say "literal literal".
 
 **"x-ray boost"**
 
-When the speech recognizer keeps mishearing a specific word -- usually a name, a product, a place, or a technical term -- you can teach it to listen for that word by boosting it:
+When the speech recognizer keeps mishearing a specific word -- usually a name, a product, a place, or a technical term -- select the problem word anywhere on screen (highlight it with the mouse or say "select word") and say **"x-ray boost"**. WheelHouse copies the selection and sends it to your speech engine as a new recognition hint, saved to a shared hints file on disk so it **persists across restarts** -- you only need to boost each tricky word once. Hints are capped at 100 characters, so boost individual words or short phrases, not whole sentences.
 
-1. Select the problem word anywhere on screen (highlight it with the mouse or say "select word").
-2. Say **"x-ray boost"**.
-
-WheelHouse copies the selected text and sends it to your speech engine as a new recognition hint. The hint is saved to a shared hints file on disk, so it **persists across restarts** -- you only need to boost each tricky word once. Hints are limited to 100 characters each, so boost individual words or short phrases, not whole sentences.
-
-One important honesty note: **saving a hint and applying it are two different things**, and what happens depends on which speech engine you use.
-
-- **Parakeet (the default engine): the hint is saved but NOT applied out of the box.** Parakeet ships with hint biasing turned off, because applying hints slows its recognition by roughly 25 percent per utterance in the project's measurements. "x-ray boost" still records the hint. To make Parakeet actually use your saved hints, set enabled = true under the [hotwords] section of the Parakeet engine's own config file and restart WheelHouse -- accepting the slower recognition. Until you opt in, do not expect boosting to change what Parakeet hears.
-- **Distil-Whisper**: applies saved hints out of the box, as biasing terms in its decoder.
-- **Google Cloud Speech-to-Text**: applies saved hints out of the box, as speech adaptation phrases.
+One important honesty note: **saving a hint and applying it are two different things.** **Parakeet (the default engine) saves the hint but does NOT apply it out of the box**: hint biasing ships turned off because applying hints slows recognition by roughly 25 percent per utterance in the project's measurements. To make Parakeet actually use your saved hints, set enabled = true under the [hotwords] section of the Parakeet engine's own config file and restart WheelHouse -- accepting the slower recognition. Until you opt in, do not expect boosting to change what Parakeet hears. **Distil-Whisper** and **Google Cloud Speech-to-Text** both apply saved hints out of the box (as decoder biasing terms and speech adaptation phrases, respectively).
 
 **"x-ray patterns" (the Pattern Manager)**
 
 This opens the **Pattern Manager** window, a browsable interface that lists every voice command and text replacement WheelHouse knows. The list groups patterns by category; selecting any entry shows its details -- the trigger phrase, what it does, and whether it needs the hotword.
 
-From the Pattern Manager you can:
-
-- **View** any pattern, including all the built-in ones that ship with WheelHouse.
-- **Create** new personal patterns -- for example a shortcut that types your email address, corrects a word the engine keeps mishearing, or opens a specific program.
-- **Edit** and **delete** patterns you created yourself.
-- **Customize** a built-in pattern: this creates a personal copy with the same trigger that overrides the built-in. The built-in itself is never modified, so deleting your copy restores stock behavior.
-- **Change the command hotword** (the "x-ray" prefix) if another word works better for your voice.
+From the Pattern Manager you can **view** any pattern (including every built-in), **create** new personal patterns (a shortcut that types your email address, a correction for a word the engine keeps mishearing, a command that opens a program), **edit** and **delete** the ones you created, **customize** a built-in (this makes a personal copy with the same trigger that overrides it; the built-in is never modified, so deleting your copy restores stock behavior), and **change the command hotword** (the "x-ray" prefix) if another word works better for your voice.
 
 Your personal patterns are stored in a separate per-machine file, so they survive WheelHouse upgrades, and the shipped patterns file is never touched.
 
@@ -714,7 +738,7 @@ Stay with toggle mode if you want hands-free control -- it is the default for a 
 
 You do not need to edit any settings to use WheelHouse. Every value ships with a working default, and the most common choices (which speech engine to use, push-to-talk versus click-to-talk) can be changed from the tray menu or by voice without ever opening a file. This section exists for the day you want to fine-tune something.
 
-WheelHouse keeps its settings in a plain text file called config.toml. It is an ordinary text file you can open in Notepad. The installer creates it for you from a template, and your copy is personal to your machine -- it is never sent anywhere. Lines that start with a number sign are comments; the file explains many of its own settings inline.
+WheelHouse keeps its settings in a plain text file called config.toml, which you can open in Notepad. The installer creates it from a template; your copy is personal to your machine and never sent anywhere. Lines starting with a number sign are comments; the file explains many of its own settings inline.
 
 A few practical notes before the reference:
 
@@ -724,43 +748,43 @@ A few practical notes before the reference:
 
 ### General Settings (top of the file)
 
-**SPEECH_WEBSOCKET_HOST** -- The network address the speech engine uses to talk to the rest of WheelHouse. Default: 127.0.0.1, which means "this computer only" -- nothing leaves your machine. Change it only in the advanced setup where speech recognition runs on a second computer on your home network; otherwise leave it alone.
+**SPEECH_WEBSOCKET_HOST** (default 127.0.0.1, meaning "this computer only"): the internal address the speech engine uses to reach WheelHouse. Change only for the advanced setup where speech recognition runs on a second computer on your home network.
 
-**REPLACEMENT_TIMEOUT_MS** and **COMMAND_TIMEOUT_MS** -- How long, in milliseconds, WheelHouse waits after you stop speaking before it decides a command or a correction phrase is complete. Default: 700 for both. If commands seem to fire before you finish your sentence -- common on slower machines -- raise these (try 900 or 1000). If WheelHouse feels sluggish to respond, you can lower them slightly.
+**REPLACEMENT_TIMEOUT_MS** / **COMMAND_TIMEOUT_MS** (default 700 each, in milliseconds): how long WheelHouse waits after you stop speaking before deciding a command or correction phrase is complete. Raise to 900-1000 if commands fire before you finish (common on slower machines); lower slightly if responses feel sluggish.
 
-**GREEDY_TIMEOUT_MS** -- A longer wait used for commands that intentionally keep listening for more words. Default: 5000 (five seconds). Rarely needs changing.
+**GREEDY_TIMEOUT_MS** (default 5000): a longer wait for commands that intentionally keep listening for more words. Rarely needs changing.
 
-**COMMAND_COMPLETION_WAIT_MS** -- A short pause after a command finishes, so a fast follow-up command does not collide with it. Default: 1000. Raise it on a slow machine if back-to-back commands step on each other.
+**COMMAND_COMPLETION_WAIT_MS** (default 1000): a short pause after a command finishes so a fast follow-up does not collide with it. Raise on a slow machine if back-to-back commands step on each other.
 
-**ENABLE_AUDIO_SUPPRESSION**, **ENABLE_SONOS_SUPPRESSION**, **ENABLE_IDLE_SUPPRESSION** -- Three on/off switches (true or false) that pause listening when other audio is playing on the computer, when Sonos speakers are playing, or when the computer has been idle for a while. Default: all true. Turn one off if you actually want WheelHouse listening during music or video playback -- but expect more misrecognitions, because the microphone will pick up the audio.
+**ENABLE_AUDIO_SUPPRESSION** / **ENABLE_SONOS_SUPPRESSION** / **ENABLE_IDLE_SUPPRESSION** (default all true): pause listening while computer audio or Sonos music is playing, or after the computer sits idle. Turn one off only if you want WheelHouse listening during playback -- expect more misrecognitions, because the microphone picks up the audio.
 
-**LOG_FILE** and **LOG_LEVEL** -- Where WheelHouse writes its activity log and how detailed that log is. Defaults: an empty LOG_FILE (the standard log location) and DEBUG detail. You would only change these when a support conversation asks you to.
+**LOG_FILE** / **LOG_LEVEL** (defaults: empty, meaning the standard log location, and DEBUG): where the activity log goes and how detailed it is. Change only when a support conversation asks you to.
 
-**LOG_TRANSCRIPTS** -- A privacy setting. Default: false, which means the log files never contain the words you dictate or anything from your clipboard -- only a note of how long the text was. Set it to true only while troubleshooting recognition problems, and turn it back off afterward: while it is on, everything you dictate, including passwords, accumulates in the log files on your disk.
+**LOG_TRANSCRIPTS** (default false): a privacy setting -- false keeps the words you dictate and your clipboard contents out of the log files (only text lengths are noted). Set true only while troubleshooting recognition, then turn it back off: while on, everything you dictate, including passwords, accumulates in the logs.
 
-**SIDE_OFFSET** -- WheelHouse can use a mouse thumb wheel as a volume and brightness control. When the mouse pointer is within this many pixels of the left edge of the screen, the wheel adjusts brightness; anywhere else it adjusts volume. Default: 10. Raise it if you find the brightness zone too hard to hit.
+**SIDE_OFFSET** (default 10): width in pixels of the left-edge screen zone where the mouse thumb wheel adjusts brightness instead of volume. Raise it if the brightness zone is hard to hit.
 
-**BRIGHTNESS_INCREMENT** and **VOLUME_INCREMENT** -- How big each step of that thumb-wheel adjustment is. Defaults: 1.0 for brightness, 0.5 for volume. Raise them for faster, coarser changes; lower them for finer control.
+**BRIGHTNESS_INCREMENT** / **VOLUME_INCREMENT** (defaults 1.0 / 0.5): the size of each thumb-wheel adjustment step. Raise for faster, coarser changes; lower for finer control.
 
-**FLOATING_BUTTON_SIZE**, **FLOATING_BUTTON_POS**, **FLOATING_BUTTON_VISIBLE** -- The small on-screen status button. Size in pixels (default 30), position as an offset from a screen corner (default -18, -15), and whether it shows at all (default false -- hidden). Set FLOATING_BUTTON_VISIBLE to true if you want an always-visible click target for the microphone, which is especially handy in push-to-talk mode.
+**FLOATING_BUTTON_SIZE** / **FLOATING_BUTTON_POS** / **FLOATING_BUTTON_VISIBLE** (defaults 30 pixels, corner offset -18 -15, false = hidden): the small on-screen status button. Set FLOATING_BUTTON_VISIBLE to true for an always-visible microphone click target -- especially handy in push-to-talk mode.
 
-**SPEECH_ENABLED_ON_STARTUP** -- Whether WheelHouse starts listening as soon as it launches. Default: true. Set false if you prefer to turn the microphone on manually each session.
+**SPEECH_ENABLED_ON_STARTUP** (default true): whether WheelHouse starts listening as soon as it launches. Set false to turn the microphone on manually each session.
 
-**SHOW_SPEECH_PULSE** -- Whether the tray icon pulses while WheelHouse hears you speaking. Default: true. It is a useful "yes, I can hear you" signal; turn it off only if you find the animation distracting.
+**SHOW_SPEECH_PULSE** (default true): pulse the tray icon while WheelHouse hears you -- a useful "yes, I can hear you" signal. Turn off only if the animation distracts.
 
-**SPATIAL_SOUND_EXEC** and **SPATIAL_SOUND_FORMAT** -- Support for switching Dolby Atmos spatial sound by voice, using a small free helper tool from NirSoft. Default: SPATIAL_SOUND_EXEC is empty, which leaves the feature off (SPATIAL_SOUND_FORMAT ships preset to "Dolby Atmos for home theater"). Only fill in the tool path if you use Dolby Atmos and have that tool installed; everyone else can ignore them.
+**SPATIAL_SOUND_EXEC** / **SPATIAL_SOUND_FORMAT** (defaults: empty = feature off, "Dolby Atmos for home theater"): voice switching of Dolby Atmos spatial sound via a small free NirSoft helper tool. Fill in the tool path only if you use Dolby Atmos and have that tool installed; everyone else can ignore both.
 
 ### Brightness Coordinator ([brightness_coordinator])
 
-WheelHouse changes screen brightness in layers: real hardware brightness first (a supported TV or the laptop panel), then a software dimming effect once the hardware is as low as it goes. These settings tune that handoff. Most people never touch this section.
+WheelHouse changes screen brightness in layers: real hardware brightness first (a supported TV or the laptop panel), then a software dimming effect once the hardware is as low as it goes. Most people never touch this section.
 
-**software_dimmer** -- Which software dimming method to use when hardware brightness runs out. Default: gamma_dimmer, which darkens the screen through the graphics card. The alternatives are "overlay" (a translucent overlay window) and "flux" (works through a companion dimming app's hotkeys). Change it only if dimming misbehaves with your particular monitor setup.
+**software_dimmer** (default gamma_dimmer): the software dimming method -- "gamma_dimmer" (darkens through the graphics card), "overlay" (a translucent overlay window), or "flux" (drives a companion dimming app's hotkeys). Change only if dimming misbehaves with your monitor setup.
 
-**unwinding_threshold** -- The brightness level (default 10) at which WheelHouse starts undoing software dimming and handing control back to the hardware as you brighten the screen.
+**unwinding_threshold** (default 10): currently has no effect -- WheelHouse hands control back to the hardware only once software dimming is fully undone, whatever this is set to.
 
-**flux_transition_percent** -- How many percent of brightness each simulated hotkey press represents when driving a companion dimming app. Default: 2.
+**flux_transition_percent** (default 2): percent of brightness per simulated hotkey press when driving a companion dimming app.
 
-**flux_dim_hotkey** and **flux_brighten_hotkey** -- The keyboard shortcuts WheelHouse presses to drive that companion app. Defaults: Alt+PageDown to dim, Alt+PageUp to brighten. Change these only if you have remapped the app's own hotkeys.
+**flux_dim_hotkey** / **flux_brighten_hotkey** (defaults Alt+PageDown / Alt+PageUp): the shortcuts pressed to drive that companion app. Change only if you remapped the app's own hotkeys.
 
 ### Plugins ([plugins.*])
 
@@ -773,72 +797,57 @@ document.
 
 After an idle pause, you can wake WheelHouse by saying its wake word out loud -- no keyboard or mouse needed. This runs entirely on your computer.
 
-- **enabled** -- On/off. Default: true.
-- **keyword** -- The wake word. Default: "computer".
-- **sensitivity** -- The confidence score a detection must reach before it counts, from 0 to 1. Default: 0.5. Lower it if saying "computer" often fails to wake WheelHouse; raise it if ordinary conversation keeps waking it by accident.
-- **mode** -- What the wake word is used for. Default: "idle_recovery", meaning it wakes WheelHouse from an idle pause.
-- **model_dir** -- Where the wake-word listening model lives on disk. Set by the installer; do not change it.
+**enabled** (default true): on/off. **keyword** (default "computer"): the wake word. **sensitivity** (default 0.5, range 0-1): lower it if saying "computer" often fails to wake WheelHouse; raise it if ordinary conversation keeps waking it by accident. **mode** (default "idle_recovery"): what the wake word is used for -- waking WheelHouse from an idle pause. **model_dir**: where the listening model lives on disk; set by the installer, do not change it.
 
 ### Text Insertion Fine-Tuning ([ui_actions.*])
 
 These settings govern the mechanics of how dictated text lands in other programs. The defaults are tuned carefully; change them only when troubleshooting a specific symptom.
 
-#### Timing ([ui_actions.timing])
+**Timing ([ui_actions.timing])** -- all in milliseconds unless noted; on older or heavily loaded machines, raising these can fix text that arrives garbled, half-pasted, or out of order: **clipboard_verification_timeout_ms** (default 250), **clipboard_operation_delay_ms** (default 50), **selection_clear_delay_ms** (default 20), **context_gather_delay_ms** (default 10), **post_paste_delay_ms** (default 30), and **utterance_clipboard_timeout_seconds** (default 60.0) -- how long, in seconds, a copied utterance stays available for the "paste that" style of command.
 
-All values are in milliseconds unless noted. On older or heavily loaded machines, raising these can fix text that arrives garbled, half-pasted, or out of order:
+**Short-text typing ([ui_actions.verified_unicode])**: **max_chars** (default 50) -- dictations up to this length are typed directly, character by character, avoiding your clipboard; longer ones go through the clipboard. Lower it if a particular app mishandles direct typing; raise it to have more dictations bypass the clipboard.
 
-- **clipboard_verification_timeout_ms** (default 250) -- how long WheelHouse waits to confirm the clipboard operation worked.
-- **clipboard_operation_delay_ms** (default 50) -- a small pause around clipboard use.
-- **selection_clear_delay_ms** (default 20), **context_gather_delay_ms** (default 10), **post_paste_delay_ms** (default 30) -- brief pauses that keep fast programs and slow programs in step.
-- **utterance_clipboard_timeout_seconds** (default 60.0) -- how long, in seconds, a copied utterance stays available for the "paste that" style of command.
+**Browser recognition ([ui_actions.foreground_check])**: **same_process_browser_names** -- the web browsers WheelHouse recognizes (browsers manage their windows in an unusual way); all the mainstream ones are already listed. **same_process_browser_names_extend** adds an unusual browser without retyping the built-ins.
 
-#### Short-text typing ([ui_actions.verified_unicode])
-
-**max_chars** (default 50) -- Dictations up to this length are typed directly, character by character, which avoids touching your clipboard at all. Longer dictations go through the clipboard because typing them out would be slow. Lower this if a particular app mishandles direct typing; raise it if you want more dictations to bypass the clipboard.
-
-#### Browser recognition ([ui_actions.foreground_check])
-
-**same_process_browser_names** -- The list of web browsers WheelHouse recognizes, which it needs because browsers manage their windows in an unusual way. All the mainstream browsers are already listed. **same_process_browser_names_extend** lets you add an unusual browser to the list without retyping the built-in ones.
-
-#### Dictation safety lists ([ui_actions.text_target])
-
-Before typing anywhere, WheelHouse checks that the spot your cursor is in really accepts text -- this is what prevents dictation from spraying keystrokes into the wrong place. The four settings here (**allow_class_names_extend**, **deny_control_types_extend**, **deny_class_names_extend**, **browser_process_names_extend**) let you extend the built-in allow and deny lists for an unusual app. Default: all empty. Most people should use the built-in approval prompt instead of editing these -- when WheelHouse is unsure about a text box, it asks you on screen, and remembers your answer.
+**Dictation safety lists ([ui_actions.text_target])**: before typing anywhere, WheelHouse checks that the focused spot really accepts text. The four extend settings (**allow_class_names_extend**, **deny_control_types_extend**, **deny_class_names_extend**, **browser_process_names_extend**, default all empty) extend the built-in allow and deny lists for an unusual app. Most people should use the built-in approval prompt instead -- when WheelHouse is unsure about a text box, it asks on screen and remembers your answer.
 
 ### Speech Interaction ([speech])
 
-- **interaction_mode** -- "toggle" (default) means the microphone stays on until you turn it off: click once to start, click again to stop. "push_to_talk" means WheelHouse listens only while you hold down the floating button (a single click on the tray icon deliberately does nothing in this mode), and mutes system audio while you hold. You can also switch by voice ("push to talk mode", "click to talk mode") without editing anything.
-- **ptt_safety_timeout_seconds** -- In push-to-talk mode, a safety net that automatically releases the microphone if a hold gets stuck (for example, if the button was held when a window stole focus). Default: 30 seconds. Raise it if you routinely dictate longer than 30 seconds in one hold.
-- **notify_on_revision** -- Whether to show a small notice when the speech engine revises its guess at what you said. Default: false.
+**interaction_mode** (default "toggle"): "toggle" keeps the microphone on until you turn it off (click to start, click to stop); "push_to_talk" listens only while you hold the floating button, muting system audio during the hold (a single tray-icon click deliberately does nothing in that mode). You can also switch by voice ("push to talk mode" / "click to talk mode") without editing anything.
+
+**ptt_safety_timeout_seconds** (default 30): in push-to-talk mode, automatically releases the microphone if a hold gets stuck. Raise it if you routinely dictate longer than 30 seconds in one hold.
+
+**notify_on_revision** (default false): show a small notice when the speech engine revises its guess at what you said.
 
 ### Speech Recognition Engine ([stt])
 
-**last_provider** -- Which speech-to-text engine WheelHouse uses. Default: "parakeet_tdt", the local engine that runs entirely on your computer with no account and no internet after setup. The other options are "distil_medium_en" (a more accurate local engine that needs a recent graphics card) and "google_stt" (Google's cloud service; needs a Google Cloud account, sends audio to Google). You normally switch engines from the tray menu rather than editing this -- WheelHouse writes your choice here for you, which is why it is called "last" provider.
+**last_provider** (default "parakeet_tdt"): which speech-to-text engine WheelHouse uses -- "parakeet_tdt" (local, offline, no account), "distil_medium_en" (a more accurate local engine that needs a recent graphics card), or "google_stt" (Google's cloud service; needs a Google Cloud account, sends audio to Google). You normally switch engines from the tray menu rather than editing this -- WheelHouse writes your choice here for you, which is why it is called "last" provider.
 
-**[stt.google] boost_words** -- A list of words or phrases the Google engine should favor when unsure -- useful for names or uncommon words it keeps getting wrong. Default: empty. Only matters if you use the Google engine.
+**[stt.google] boost_words** (default empty): words or phrases the Google engine should favor when unsure -- useful for names or uncommon words it keeps getting wrong. Only matters on the Google engine.
 
-**[stt.azure]** -- Credentials for the Azure cloud speech option: **subscription_key** (default empty) and **region** (default "eastus"). Only matters if you deliberately set up Azure; most people never touch this.
+**[stt.azure] subscription_key** / **region** (defaults empty / "eastus"): credentials for the Azure cloud speech option. Only matters if you deliberately set up Azure; most people never touch this.
 
 ### AI Features ([ai], [ai.server], [ai.help])
 
 WheelHouse's AI features are optional and off unless you point them at an AI server. In this release, the live AI feature is dictation text correction -- fixing up dictated text on request. The in-app help chat is currently disabled; these settings also gate it, but it will not appear regardless of what you set.
 
-**[ai] enabled** -- The master switch for all AI features. Default: true, but nothing happens unless a server address is also configured below. Today this means dictation text correction; it also gates the in-app help chat, which is currently disabled in this release.
+**[ai] enabled** (default true): the master switch for all AI features -- nothing happens unless a server address is also configured below. Today this means dictation text correction; it also gates the in-app help chat, which is currently disabled in this release.
 
-**[ai] knowledge_base** -- The help document the in-app help assistant would consult when answering questions. Because the in-app help chat is currently disabled, this setting has no effect today; it is kept for a future release. Default: the shipped help document.
+**[ai] knowledge_base** (default: the shipped help document): the document the in-app help assistant would consult; because the in-app help chat is currently disabled, this setting has no effect today.
 
-**[ai.server] base_url** -- The address of the AI server WheelHouse talks to, using the standard OpenAI-style interface. Default: a local Ollama server on your own machine (http://localhost:11434/v1). Any OpenAI-compatible address works here, local or hosted. Leave it empty to turn AI off entirely.
+**[ai.server] base_url** (default http://localhost:11434/v1, a local Ollama server): the address of the AI server WheelHouse talks to, using the standard OpenAI-style interface. Any OpenAI-compatible address works, local or hosted. Leave empty to turn AI off entirely.
 
-**[ai.server] model** -- The name of the AI model to request from that server. Default: "gemma3:12b". Change it to whatever model your server has installed.
+**[ai.server] model** (default "gemma3:12b"): the model name to request from that server. Change it to whatever model your server has installed.
 
-**[ai.server] kind** -- "local" or "cloud". Default: "local". This is how you tell WheelHouse whether the server is on your own machine or out on the internet -- and it frames the privacy tradeoff: with a local server, the text being corrected never leaves your computer; with a cloud one, it is sent to that service. Spell "cloud" exactly: any other value is treated as local.
+**[ai.server] kind** (default "local"): "local" or "cloud" -- whether the server is on your own machine or out on the internet, which frames the privacy tradeoff: with a local server, the text being corrected never leaves your computer. Spell "cloud" exactly: any other value is treated as local.
 
-**API credential** -- There is deliberately no key stored in the config file. If your server needs a credential (a cloud service usually does; a local Ollama does not), set it in the WHEELHOUSE_AI_API_KEY environment variable in Windows instead. That way the secret never sits in a settings file that could be copied or shared. To set it: Windows Settings, search for "environment variables", choose "Edit environment variables for your account", add a new variable named WHEELHOUSE_AI_API_KEY with your key as the value, then restart WheelHouse.
+**API credential**: deliberately no key is stored in the config file. If your server needs one (a cloud service usually does; a local Ollama does not), set the WHEELHOUSE_AI_API_KEY environment variable instead (Windows Settings, search "environment variables", "Edit environment variables for your account", add the variable, restart WheelHouse). That way the secret never sits in a settings file that could be copied or shared.
 
-**[ai.server] timeout_s** -- How many seconds WheelHouse waits for the AI server to answer before giving up on that request. Default: 30. Raise it if a slow local model keeps timing out.
+**[ai.server] timeout_s** (default 30): seconds WheelHouse waits for the AI server before giving up on a request. Raise it if a slow local model keeps timing out.
 
-**[ai.help] gem_url** -- The web address that the voice command "wheelhouse help online" opens in your browser. This hosted help page is the help surface of the current release, since the in-app help chat is currently disabled. Default: empty (until a page is configured, the command answers out loud that online help is not configured).
+**[ai.help] gem_url** (default empty): the web address that "wheelhouse help online" opens in your browser -- the help surface of the current release, since the in-app help chat is currently disabled. Until a page is configured, the command answers out loud that online help is not configured.
 
-**[ai.help] max_response_tokens** -- Caps the length of an answer from the in-app help chat; because that chat is currently disabled, this setting has no effect today. Default: 800.
+**[ai.help] max_response_tokens** (default 800): caps the length of an answer from the in-app help chat; because that chat is currently disabled, this setting has no effect today.
 
 **If the AI server is unreachable**, nothing breaks: the AI features quietly turn themselves off, and dictation, voice commands, and everything else keep working exactly as before. AI is a convenience layered on top of WheelHouse, never a requirement.
 
@@ -846,14 +855,7 @@ WheelHouse's AI features are optional and off unless you point them at an AI ser
 
 Settings for the "click ..." commands that let you press buttons and links by naming them, and for the numbered overlay ("apply numbers", then "click 5"). The defaults work well; the ones a user might plausibly adjust:
 
-- **enabled** -- Master switch for voice clicking. Default: true.
-- **min_confidence** (default 0.4) and **clear_winner_margin** (default 0.15) -- How sure WheelHouse must be before clicking something by name, and how clearly one candidate must beat the runner-up. Raise min_confidence if it clicks the wrong thing; lower it if it too often says it cannot find a match. When there is no clear winner, WheelHouse shows the numbered overlay instead of guessing.
-- **notice_max_names** (default 3) -- How many candidate names appear in the "did you mean" style notice.
-- **overlay_badge_font_pt** (default 12) -- The size of the numbers painted on screen in overlay mode. Raise it if the numbers are hard to read.
-- **response_timeout_ms** (default 3000) and **walk_deadline_ms** (default 2500) -- How long WheelHouse spends searching a window for clickable things before giving up. Raise both on a slow machine if voice clicks report a timeout in complex windows.
-- **snapshot_ttl_seconds** (default 30) -- How long the numbered overlay's snapshot of the screen stays valid.
-- **browser_processes** and **browser_processes_extend** -- The list of browser-like apps (browsers, Slack, Discord, and similar) that need a deeper search to find their buttons. Add an app to the extend list if voice clicking cannot see controls inside it.
-- **enable_screen_reader_flag** (default false) -- Tells apps a screen reader is present, which makes some of them expose more clickable elements. Try true if a particular app hides its buttons from voice clicking; note some apps change their appearance when this is on.
+**enabled** (default true): master switch for voice clicking. **min_confidence** (default 0.4) and **clear_winner_margin** (default 0.15): how sure WheelHouse must be before clicking something by name, and how clearly one candidate must beat the runner-up -- raise min_confidence if it clicks the wrong thing, lower it if it too often finds no match; with no clear winner it shows the numbered overlay instead of guessing. **notice_max_names** (default 3): how many candidate names appear in the "did you mean" style notice. **overlay_badge_font_pt** (default 12): the size of the painted numbers -- raise it if they are hard to read. **response_timeout_ms** (default 3000) and **walk_deadline_ms** (default 2500): how long WheelHouse searches a window for clickable things before giving up -- raise both on a slow machine if clicks time out in complex windows. **snapshot_ttl_seconds** (default 30): how long the numbered overlay's snapshot stays valid. **browser_processes** and **browser_processes_extend**: the browser-like apps (browsers, Slack, Discord, and similar) that need a deeper search -- add an app to the extend list if voice clicking cannot see controls inside it. **enable_screen_reader_flag** (default false): tells apps a screen reader is present, which makes some expose more clickable elements -- try true if an app hides its buttons; note some apps change their appearance when this is on.
 
 The remaining click settings (tiebreaker distances, substring matching thresholds, fallback switches) are fine-tuning knobs best left at their defaults.
 
@@ -861,21 +863,15 @@ The remaining click settings (tiebreaker distances, substring matching threshold
 
 If WheelHouse feels laggy or unreliable on an older computer, these specific changes help, roughly in order of impact:
 
-1. **Use the default speech engine.** "parakeet_tdt" (the shipped default under [stt] last_provider) is the lightest local engine and runs on any CPU. Do not switch to "distil_medium_en" on a machine without a capable recent graphics card. If even the default struggles, "google_stt" moves the heavy work to the cloud entirely -- at the cost of needing an account and an internet connection.
-2. **Give yourself more speaking time.** Raise REPLACEMENT_TIMEOUT_MS and COMMAND_TIMEOUT_MS from 700 to 900-1000 so commands stop firing before you finish, and raise COMMAND_COMPLETION_WAIT_MS from 1000 to 1500 if quick back-to-back commands collide.
-3. **Slow down text insertion.** Under [ui_actions.timing], raise post_paste_delay_ms (30 to 60), clipboard_operation_delay_ms (50 to 100), and clipboard_verification_timeout_ms (250 to 500) if dictated text arrives incomplete or garbled in slow programs.
+1. **Use the default speech engine.** "parakeet_tdt" ([stt] last_provider) is the lightest local engine and runs on any CPU; do not switch to "distil_medium_en" without a capable recent graphics card. If even the default struggles, "google_stt" moves the work to the cloud -- at the cost of an account and an internet connection.
+2. **Give yourself more speaking time.** Raise REPLACEMENT_TIMEOUT_MS and COMMAND_TIMEOUT_MS from 700 to 900-1000, and COMMAND_COMPLETION_WAIT_MS from 1000 to 1500 if quick back-to-back commands collide.
+3. **Slow down text insertion.** Under [ui_actions.timing], raise post_paste_delay_ms (30 to 60), clipboard_operation_delay_ms (50 to 100), and clipboard_verification_timeout_ms (250 to 500) if dictated text arrives incomplete or garbled.
 4. **Give voice clicking more time.** Under [click], raise response_timeout_ms (3000 to 5000) and walk_deadline_ms (2500 to 4000) if clicks time out in complex windows.
-5. **Be patient with a local AI server.** If you run one and corrections time out, raise [ai.server] timeout_s from 30 to 60 -- or simply leave AI off; nothing else depends on it.
+5. **Be patient with a local AI server.** Raise [ai.server] timeout_s from 30 to 60 if corrections time out -- or simply leave AI off; nothing else depends on it.
 
 ### Speech Recognition Quality Tweaks
 
-**The hallucination filter (Distil-Whisper engine only).** Speech engines in the Whisper family have a well-known quirk: fed a cough, a throat-clear, or background noise, they sometimes invent polite filler -- a stray "thank you" or "okay" appears that you never said. The Distil-Whisper engine ships with a confidence filter that suppresses these: when the engine's own confidence in an utterance is too low, WheelHouse discards it instead of typing it.
-
-The filter's threshold is **hallucination_logprob_threshold** in the Distil-Whisper provider's own config file (not the main config.toml), and its default is -0.55. That default was calibrated on a single male voice using a studio microphone -- so it may be too strict for other voices and setups. If you use the Distil-Whisper engine and notice that real speech is sometimes silently ignored -- more likely with a strong accent, quiet speech, or a laptop microphone -- lower the threshold to -0.7 or -0.8. More negative means more permissive: fewer real words discarded, at the cost of letting the occasional phantom "thank you" through. Setting it to a very large negative number turns the filter off entirely.
-
-If no threshold feels right for your voice, there is an escape hatch: switch to the Google engine from the tray menu, which handles noise and varied voices more robustly (it is a cloud service, so it needs an account and sends audio to Google).
-
-This filter does not apply to the default Parakeet engine -- its design does not produce the confidence signal the filter relies on, and it does not share the Whisper family's phantom-phrase quirk to the same degree.
+**The hallucination filter (Distil-Whisper engine only).** Whisper-family speech engines have a well-known quirk: fed a cough, a throat-clear, or background noise, they sometimes invent polite filler -- a stray "thank you" or "okay" you never said. The Distil-Whisper engine ships with a confidence filter that discards such low-confidence utterances instead of typing them. Its threshold is **hallucination_logprob_threshold** (default -0.55) in the Distil-Whisper provider's own config file, not the main config.toml. That default was calibrated on a single male voice with a studio microphone, so it may be too strict for other voices: if real speech is sometimes silently ignored -- more likely with a strong accent, quiet speech, or a laptop microphone -- lower it to -0.7 or -0.8. More negative means more permissive: fewer real words discarded, the occasional phantom "thank you" let through; a very large negative number turns the filter off entirely. If no threshold feels right for your voice, switch to the Google engine from the tray menu -- it handles noise and varied voices more robustly (a cloud service: needs an account, sends audio to Google). The filter does not apply to the default Parakeet engine, whose design neither produces the confidence signal it relies on nor shares the Whisper family's phantom-phrase quirk to the same degree.
 
 **Boosting words the engine keeps missing.** If you use the Google engine and it consistently mishears a particular name or technical term, add that word to boost_words under [stt.google] to tip recognition in its favor.
 
@@ -966,7 +962,7 @@ device_name = "SONY TV"  # must exactly match the device name in Windows
 
 ## Troubleshooting
 
-Most problems have simple causes, and none of them mean your computer is broken or that you did something wrong. Work through the checklist first -- it finds the problem in most cases -- then look up the matching entry below.
+Most problems have simple causes, and none mean your computer is broken or that you did something wrong. Work through the checklist first, then look up the matching entry below.
 
 ### First-Time Setup Checklist
 
@@ -992,72 +988,62 @@ If all five pass, WheelHouse is working -- any remaining trouble is specific to 
 
 - *What you see:* You start WheelHouse and nothing appears, or the tray icon never shows up.
 - *What is likely wrong:* One of WheelHouse's background processes failed during startup -- most often because a speech model is missing or an earlier install was interrupted.
-- *What to try:* Re-run the one-line install command. Re-running the installer is always safe: it repairs a broken install and keeps your settings, your personal voice patterns, your approved dictation targets, your saved speech hints, and the downloaded speech model. If it still will not start, restart the computer and try once more before reaching out for help.
+- *What to try:* Re-run the one-line install command -- always safe, repairs a broken install, and keeps your settings and personal data. If it still will not start, restart the computer and try once more before reaching out for help.
 
 **Speech engine not connecting**
 
 - *What you see:* The tray icon shows the speech engine as disconnected, or WheelHouse seems to be waiting forever for speech to start working.
 - *What is likely wrong:* The speech engine failed to start. Common reasons: its model was never downloaded, the Google Cloud engine has no credentials, or the computer is low on memory.
-- *What to try:* Switch engines from the tray menu -- Parakeet is the built-in offline engine and needs no account. If the engine you want was never fully set up, re-run the installer and choose it at the engine question; the installer downloads whatever that engine needs. For the Google Cloud engine, check that the GOOGLE_APPLICATION_CREDENTIALS environment variable points at your credentials file (see the speech engine section of this document). If the engine will not start right after an install or update, open a NEW PowerShell window and run "uv --version" -- if that command is not found, the installer's tooling never made it onto your PATH; re-run the installer, which checks and repairs this.
+- *What to try:* Switch engines from the tray menu -- Parakeet is the built-in offline engine and needs no account. If the engine you want was never fully set up, re-run the installer and choose it at the engine question. For the Google Cloud engine, check that the GOOGLE_APPLICATION_CREDENTIALS environment variable points at your credentials file (see Speech Engines and Accounts). If the engine will not start right after an install or update, open a NEW PowerShell window and run "uv --version" -- if that command is not found, the installer's tooling never made it onto your PATH; re-run the installer, which checks and repairs this.
 
 **Commands not recognized**
 
 - *What you see:* You say "undo" and nothing happens, or the word appears as typed text instead.
 - *What is likely wrong:* The speech engine misheard you (for example "undue" instead of "undo"), or you spoke while other audio was playing and the words ran together.
-- *What to try:* Speak a little more deliberately, with a brief pause before the command. If one particular word is misheard over and over, select a correctly spelled copy of it anywhere on screen and say "x-ray boost" -- that teaches the speech engine to expect that word from now on.
+- *What to try:* Speak a little more deliberately, with a brief pause before the command. If one particular word is misheard over and over, select a correctly spelled copy of it anywhere on screen and say "x-ray boost" to teach the speech engine to expect that word.
 
 **Command words are typed as text instead of doing anything**
 
 - *What you see:* You say "close window" and the words "close window" appear in your document instead of the window closing.
-- *What is likely wrong:* Nothing is broken. Commands that could be destructive need the safety word "x-ray" in front, so they can never fire by accident while you are dictating a normal sentence.
-- *What to try:* Say "x-ray close window". If you are not sure whether a command needs the safety word, the command list in this document marks the ones that do.
+- *What is likely wrong:* Nothing is broken. Destructive commands need the safety word "x-ray" in front, so they can never fire by accident while you are dictating a normal sentence.
+- *What to try:* Say "x-ray close window". The command list in this document marks which commands need the safety word.
 
 **Dictation not appearing in text fields**
 
 - *What you see:* You speak, WheelHouse clearly hears you, but no text appears in the app you are looking at. You may see a small notice saying WheelHouse was not sure the spot you are in accepts text.
-- *What is likely wrong:* Either the text field is not actually focused (clicked into), or WheelHouse could not confirm that the focused spot is a real text box. This caution is deliberate: typing into the wrong place in some apps -- especially web browsers -- can trigger keyboard shortcuts instead of entering text, so WheelHouse refuses rather than guesses.
-- *What to try:* Click directly inside the text field and try again. If a notice appears with a "Try it anyway" button, use it -- if the text lands correctly a few times, WheelHouse remembers that spot and stops asking. To confirm WheelHouse itself is fine, test in Notepad: if Notepad works, the problem is that one app's unusual text field, not your setup.
+- *What is likely wrong:* Either the text field is not actually focused (clicked into), or WheelHouse could not confirm the focused spot is a real text box. The caution is deliberate: typing into the wrong place in some apps -- especially web browsers -- can trigger keyboard shortcuts instead of entering text, so WheelHouse refuses rather than guesses.
+- *What to try:* Click directly inside the text field and try again. If a notice appears with a "Try it anyway" button, use it -- once the text lands correctly a few times, WheelHouse remembers that spot and stops asking. If Notepad works, WheelHouse itself is fine and the problem is that one app's unusual text field.
 
 **Real speech silently ignored, or short dictations disappear**
 
 - *What you see:* With the Distil-Whisper (graphics card) engine, occasional short phrases -- or for some voices, quite a lot of real speech -- produce nothing at all, with no error.
-- *What is likely wrong:* That engine has a built-in filter that discards sounds it judges to be noise rather than speech -- coughs, throat clears, a door closing. The filter is tuned for a typical voice on a good microphone. If you have a strong accent, speak quietly, or use a laptop's built-in microphone, the filter can misjudge your real speech as noise and silently drop it.
-- *What to try:* Make the filter less strict: in the Distil-Whisper engine's own config file, lower the hallucination_logprob_threshold setting from its default of -0.55 to -0.7 or -0.8 (more negative means less strict), then restart WheelHouse. If tuning does not help your voice, switch to a different engine from the tray menu -- the Google Cloud engine does not use this filter.
-
-**The floating button keeps pulsing after a cough or throat clear**
-
-- *What you see:* On older versions, a cough or other short noise could leave the listening indicator pulsing for a long time even though nothing was being heard.
-- *What is likely wrong:* This was a known bug and has been fixed -- current versions reset the indicator on their own within a few seconds.
-- *What to try:* If you still see it, update WheelHouse by re-running the one-line install command.
-
-**Everything freezes after clicking inside WheelHouse's console window**
-
-- *What you see:* On older versions, clicking and dragging inside the black console window that opens with WheelHouse could freeze the whole app until you pressed the Escape key in that window.
-- *What is likely wrong:* A Windows console feature called QuickEdit pauses programs while text is selected in their console. This was a known issue and has been fixed -- current versions turn that feature off at startup.
-- *What to try:* If it happens, click on the console window and press Escape to unfreeze everything, then update WheelHouse by re-running the install command.
+- *What is likely wrong:* That engine's noise filter (tuned for a typical voice on a good microphone) can misjudge real speech as noise -- more likely with a strong accent, quiet speech, or a laptop's built-in microphone -- and silently drop it.
+- *What to try:* Make the filter less strict: in the Distil-Whisper engine's own config file, lower hallucination_logprob_threshold from -0.55 to -0.7 or -0.8 (more negative means less strict), then restart WheelHouse. If tuning does not help your voice, switch engines from the tray menu -- the Google Cloud engine does not use this filter.
 
 **AI text correction does nothing or times out**
 
 - *What you see:* Dictated text is not being cleaned up even though AI is turned on. (Text correction is the AI feature in this release; the in-app help chat is currently disabled.)
 - *What is likely wrong:* WheelHouse does not run the AI itself -- it sends requests to a separate AI server you point it at. If that server is missing, unreachable, slow, or does not have the requested model, the AI features quietly switch off while everything else keeps working.
-- *What to try, in order:*
-  1. In your settings file, confirm the [ai] section has enabled = true and that [ai.server] base_url is filled in. An empty base_url turns AI off on purpose.
-  2. Confirm the AI server is actually running and reachable at that address, and that the [ai.server] model name is one that server really offers.
-  3. If the server is just slow to answer, raise [ai.server] timeout_s so WheelHouse waits longer before giving up.
-  4. For a remote server that requires a key, set the WHEELHOUSE_AI_API_KEY environment variable to your key and restart WheelHouse. The key lives only in that environment variable, never in the settings file.
+- *What to try, in order:* confirm [ai] enabled = true and [ai.server] base_url is filled in (an empty base_url turns AI off on purpose); confirm the server is reachable at that address and the [ai.server] model name is one it really offers; raise [ai.server] timeout_s if the server is just slow to answer; and for a remote server that requires a key, set the WHEELHOUSE_AI_API_KEY environment variable (the key never lives in the settings file) and restart WheelHouse.
 - *Reassurance:* An unreachable AI server never breaks WheelHouse. Dictation, voice commands, and everything else keep working with AI off.
+
+<!-- install-doc:start -->
+
+### Installer troubleshooting
 
 **Installer failures**
 
 The installer's failure messages -- low memory, low disk space, a blocked uv download, an integrity-check failure, an interrupted download, a failed services setup, an incomplete speech model, or WheelHouse still running during an update -- are explained in the "What failure looks like" part of the Getting Started section, along with what to do about each. The short version: re-running the installer is always safe, downloads resume where they left off, and every message is safe to paste into a help request.
 
+<!-- install-doc:end -->
+
 ---
 
 ## Getting Help
 
-If the answer is not in this document, you can reach the developer at the WheelHouse project page: https://github.com/wheelhouse-project/WheelHouse -- open an issue or start a discussion there. Include what you tried, what you expected, and what happened instead; if the installer printed an error, paste it in full. WheelHouse is actively developed, and real-world reports like yours are how it improves.
+If the answer is not in this document, you can reach the developer at the WheelHouse project page: https://github.com/wheelhouse-project/WheelHouse -- open an issue or start a discussion there. Include what you tried, what you expected, and what happened instead; if the installer printed an error, paste it in full.
 
 ---
 
 Generated: 2026-04-07 (regenerated 2026-07-17 from current sources for the v1.0.2 release, wh-help-doc-regen)
-WheelHouse version: 1.0.2
+WheelHouse version: 1.0.3

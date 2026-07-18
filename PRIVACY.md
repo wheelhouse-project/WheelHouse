@@ -95,8 +95,11 @@ All of these stay on your machine and are excluded from any repository:
 - `%APPDATA%\WheelHouse` and `%LOCALAPPDATA%\WheelHouse` — runtime state,
   downloaded models, and the per-machine model-path override file.
 
-Uninstalling removes the installation directory; the two AppData folders
-are listed in INSTALL.md's uninstall section so you can remove them too.
+The uninstaller removes the installation directory and both AppData
+folders. If you choose to keep your settings, it preserves them in a
+`preserved-user-data` folder under `%LOCALAPPDATA%\WheelHouse` instead of
+deleting that folder; INSTALL.md's uninstall section describes both
+options.
 
 ## Questions
 

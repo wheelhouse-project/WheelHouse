@@ -43,12 +43,16 @@ class TestFullPipeline:
         )
 
     @pytest.mark.asyncio
-    async def test_grab_to_end(self, text_parser, mock_handler):
+    async def test_bare_grab_falls_through_to_dictation(self, text_parser, mock_handler):
+        """The standalone ^grab pattern was removed (Housekeeping, 5ec657e2).
+
+        "grab ..." selection is reachable only inside a "go" chain (see
+        test_chained_go_home_grab_to_end); a bare "grab to end" matches no
+        pattern and falls through to dictation.
+        """
         matched = await text_parser.parse_and_execute("grab to end")
-        assert matched is True
-        mock_handler.app.send_request.assert_called_once_with(
-            "hotkey_action", {"keys": ["shift", "end"], "repeat": 1}
-        )
+        assert matched is False
+        mock_handler.app.send_request.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_chained_go_home_grab_to_end(self, text_parser, mock_handler):

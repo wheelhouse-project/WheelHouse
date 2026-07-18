@@ -82,7 +82,14 @@ vocabulary (one phrase per line, user-editable). Google STT consumes it as
 adaptation phrase hints. The Parakeet provider regenerates
 `runtime/parakeet-hotwords.txt` from it at startup and can pass it to
 sherpa-onnx as hotwords -- off by default because hotword biasing forces
-beam-search decoding, which measured ~25% extra inference latency.
+beam-search decoding, which measured ~25% extra inference latency. The
+Distil-Whisper provider has a faster-whisper `hotwords` pass-through
+(wh-apmg) that is also off by default, for a harder reason: the
+word-list bias prompt collapses distil-medium.en decoding outright --
+with 10 hints (~70 chars) the model returns zero segments on clean
+speech (measured 2026-07-17, wh-distil-hotwords-decode-collapse). Do
+not enable `[hotwords]` in the distil config without verifying decode
+quality against the live hint list first.
 
 ## 3. AI text processing (thin client)
 

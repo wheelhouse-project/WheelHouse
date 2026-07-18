@@ -1,16 +1,20 @@
-"""Package guards for the bring-your-own-LLM help kit (wh-llm-help-kit).
+"""Package guards for the one-file LLM help kit and the official GPT files.
 
-The kit ships two user-facing files: the canonical help payload
-`services/wheelhouse/knowledge/wheelhouse_help.md` and the provider-neutral
-`scripts/release/public/llm/assistant-instructions.txt`. The txt is GENERATED
-from the help doc's embedded "## Instructions for AI Assistant" section --
-that section is the single source of the assistant behavior rules (design
-decision 9, docs/plans/2026-07-15-llm-help-packaging-design.md). This test
-re-derives the expected txt from the help doc independently of the extractor
-script, so a drifted or hand-edited txt fails here.
+The kit ships ONE user-facing file: the canonical help payload
+`services/wheelhouse/knowledge/wheelhouse_help.md`, whose embedded
+"## Instructions for AI Assistant" section carries the assistant behavior
+rules. The 2026-07-17 source-of-truth design
+(docs/plans/2026-07-17-help-doc-source-of-truth-design.md) retired the
+generated companion `llm/assistant-instructions.txt` and its extractor,
+superseding decisions 8 and 9 of the 2026-07-15 packaging design. The llm/
+folder instead ships the two files behind the official WheelHouse ChatGPT
+GPT -- `gpt-instructions.txt` and `gpt-action-openapi.json` (one GET of the
+help doc's raw GitHub URL) -- so anyone can also build their own
+live-fetching assistant from them.
 
-Pure stdlib (pathlib + re only); no service imports, no fixtures.
+Pure stdlib (pathlib + json + re only); no service imports, no fixtures.
 """
+import json
 import re
 from pathlib import Path
 
@@ -19,28 +23,57 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 _HELP_DOC = (
     _REPO_ROOT / "services" / "wheelhouse" / "knowledge" / "wheelhouse_help.md"
 )
-_INSTRUCTIONS_TXT = (
+_LLM_DIR = _REPO_ROOT / "scripts" / "release" / "public" / "llm"
+_LLM_README = _LLM_DIR / "README.md"
+_GPT_INSTRUCTIONS = _LLM_DIR / "gpt-instructions.txt"
+_GPT_ACTION_SCHEMA = _LLM_DIR / "gpt-action-openapi.json"
+_LANDING_PAGE = _REPO_ROOT / "scripts" / "release" / "public" / "site" / "index.html"
+_PUBLIC_README = _REPO_ROOT / "scripts" / "release" / "public" / "README.md"
+
+_HEADING = "## Instructions for AI Assistant"
+_RAW_DOC_URL = (
+    "https://raw.githubusercontent.com/wheelhouse-project/WheelHouse/main/"
+    "services/wheelhouse/knowledge/wheelhouse_help.md"
+)
+
+
+# ---------------------------------------------------------------------------
+# Retirement guards: the generated companion and its machinery must be gone.
+
+_RETIRED_PATHS = (
+    _LLM_DIR / "assistant-instructions.txt",
+    _REPO_ROOT / "scripts" / "release" / "extract_assistant_instructions.py",
     _REPO_ROOT
     / "scripts"
     / "release"
-    / "public"
-    / "llm"
-    / "assistant-instructions.txt"
+    / "tests"
+    / "test_extract_assistant_instructions.py",
 )
 
-_HEADING = "## Instructions for AI Assistant"
+
+def test_assistant_instructions_companion_is_retired():
+    leftovers = [str(p.relative_to(_REPO_ROOT)) for p in _RETIRED_PATHS if p.exists()]
+    assert not leftovers, (
+        f"retired assistant-instructions machinery still present: {leftovers}. "
+        "The 2026-07-17 source-of-truth design shrank the kit to one file; "
+        "the behavior rules travel only inside the help document."
+    )
 
 
-def _embedded_instruction_body() -> str:
-    """Extract the instruction-section body from the help doc.
+def test_no_shipped_doc_references_assistant_instructions_txt():
+    for path in (_LLM_README, _LANDING_PAGE, _PUBLIC_README):
+        content = path.read_text(encoding="utf-8")
+        assert "assistant-instructions" not in content, (
+            f"{path.name} still references the retired "
+            "assistant-instructions.txt; the setup is upload-one-file now."
+        )
 
-    The section is delimited by its heading line (which must occur exactly
-    once) and the first subsequent line that is exactly `---`. Leading and
-    trailing blank lines -- including whitespace-only lines -- are stripped;
-    the result ends with a single newline. This mirrors the contract of
-    scripts/release/extract_assistant_instructions.py, re-derived
-    independently so a drifted txt fails here.
-    """
+
+# ---------------------------------------------------------------------------
+# The embedded instruction section is now the ONLY home of the rules.
+
+
+def test_embedded_instruction_section_present_and_wellformed():
     lines = _HELP_DOC.read_text(encoding="utf-8").splitlines()
     heading_count = lines.count(_HEADING)
     assert heading_count == 1, (
@@ -49,41 +82,135 @@ def _embedded_instruction_body() -> str:
     rest = lines[lines.index(_HEADING) + 1 :]
     terminators = [i for i, line in enumerate(rest) if line == "---"]
     assert terminators, "no '---' terminator after the instruction heading"
-    body = rest[: terminators[0]]
-    while body and not body[0].strip():
-        body = body[1:]
-    while body and not body[-1].strip():
-        body = body[:-1]
+    body = "\n".join(rest[: terminators[0]]).strip()
     assert body, "instruction section is empty"
-    return "\n".join(body) + "\n"
-
-
-def test_assistant_instructions_txt_exists():
-    assert _INSTRUCTIONS_TXT.is_file(), (
-        f"assistant-instructions.txt not found at {_INSTRUCTIONS_TXT}. "
-        "Generate it from the help doc's embedded instruction section "
-        "(see the extraction step in .claude/skills/generate-help-doc/SKILL.md)."
+    # Pin the load-bearing directives as whole sentences (on
+    # whitespace-normalized text), not lone tokens: a token check stays green
+    # when the sentence around it inverts the rule. Editing one of these
+    # sentences in the help document is a conscious contract change and must
+    # update this test in the same commit.
+    norm = " ".join(body.split())
+    assert (
+        "answer ONLY from this document. Never invent features, commands, or"
+        " settings not documented here." in norm
+    ), "the grounding rule is missing or weakened in the embedded instructions"
+    assert (
+        "such as <!-- install-doc:start -->. They are structural markers for"
+        " tooling. Ignore them and never mention them." in norm
+    ), (
+        "the ignore-HTML-comments rule is missing or no longer tells the "
+        "assistant to ignore the markers; uploaded copies would mention them"
+    )
+    assert (
+        'read it from the "Generated" line in the footer' in norm
+    ), (
+        "the version-disclosure rule (report the release from the footer's "
+        "Generated line) is missing from the embedded instructions"
+    )
+    assert (
+        'Ignore the footer\'s "WheelHouse version" line; it is an internal'
+        " build identifier." in norm
+    ), (
+        "the rule to ignore the internal build-identifier footer line is "
+        "missing or inverted in the embedded instructions"
     )
 
 
-def test_assistant_instructions_txt_matches_embedded_section():
-    expected = _embedded_instruction_body()
-    actual = _INSTRUCTIONS_TXT.read_text(encoding="utf-8")
-    assert actual == expected, (
-        "assistant-instructions.txt has drifted from the embedded "
-        "'## Instructions for AI Assistant' section of wheelhouse_help.md. "
-        "The embedded section is the single source of truth: regenerate the "
-        "txt from the doc; never edit the txt directly."
+# ---------------------------------------------------------------------------
+# The official GPT's two files.
+
+
+def test_gpt_files_exist():
+    assert _GPT_INSTRUCTIONS.is_file(), f"missing {_GPT_INSTRUCTIONS}"
+    assert _GPT_ACTION_SCHEMA.is_file(), f"missing {_GPT_ACTION_SCHEMA}"
+
+
+def test_gpt_instructions_contract():
+    text = _GPT_INSTRUCTIONS.read_text(encoding="utf-8")
+    # Pin each directive as a whole sentence on whitespace-normalized text,
+    # not a lone token: a token check stays green when the sentence around it
+    # weakens the rule (fetch once instead of every time, refusal clause
+    # deleted, version rule inverted). Editing one of these sentences is a
+    # conscious contract change and must update this test in the same commit.
+    norm = " ".join(text.split())
+    # Fetch-first, on every question, via the named Action operation.
+    assert (
+        "FETCH FIRST, EVERY TIME: before answering any WheelHouse question,"
+        " call the getHelpDocument action" in norm
+    ), "the fetch-before-every-answer directive is missing or weakened"
+    # Grounding: only the just-fetched document, never memory.
+    assert (
+        "ONLY from the document you just fetched, never from memory" in norm
+    ), "the never-answer-from-memory grounding rule is missing or weakened"
+    # Ignore the structural markers visible in the raw markdown.
+    assert (
+        "such as <!-- install-doc:start -->; they are structural markers for"
+        " tooling. Ignore them and never mention them to the user." in norm
+    ), "the ignore-HTML-comments directive is missing or weakened"
+    # Fetch-failure rule: admit the guide is unreachable AND refuse to
+    # answer from memory, in the same directive.
+    assert (
+        "IF THE FETCH FAILS: tell the user plainly that you cannot reach the"
+        " current WheelHouse guide right now, and do NOT answer"
+        " WheelHouse-specific questions from memory." in norm
+    ), "the fetch-failure refusal directive is missing or weakened"
+    assert "https://wheelhouse-project.github.io/WheelHouse/" in text
+    assert "https://github.com/wheelhouse-project/WheelHouse" in text
+    # Version disclosure: the Generated footer line names the release; the
+    # build-identifier line is explicitly ignored, not the other way around.
+    assert (
+        'The "Generated" line in the guide\'s footer names that release;'
+        ' ignore the separate "WheelHouse version" line, which is an internal'
+        " build identifier." in norm
+    ), "the version-disclosure directive is missing or inverted"
+    # The paste target is ChatGPT's instructions field: keep it plain ASCII
+    # so nothing mangles in transit.
+    assert text.isascii(), "gpt-instructions.txt must be plain ASCII"
+
+
+def test_gpt_action_schema_is_one_get_of_the_raw_doc():
+    schema = json.loads(_GPT_ACTION_SCHEMA.read_text(encoding="utf-8"))
+    assert str(schema.get("openapi", "")) == "3.1.0", (
+        "gpt-action-openapi.json must declare OpenAPI 3.1.0 exactly: the"
+        " ChatGPT Actions editor requires a 3.1 schema, so a downgrade to"
+        " 3.0.x would be rejected when the Action is configured"
+    )
+    servers = [s["url"] for s in schema.get("servers", [])]
+    assert len(servers) == 1, f"expected exactly one server, got {servers}"
+    paths = schema.get("paths", {})
+    assert len(paths) == 1, f"expected exactly one path, got {list(paths)}"
+    ((path, item),) = paths.items()
+    assert list(item.keys()) == ["get"], (
+        f"the single path must define exactly one GET, got {list(item.keys())}"
+    )
+    assert item["get"].get("operationId") == "getHelpDocument"
+    assert servers[0].rstrip("/") + path == _RAW_DOC_URL, (
+        "server url + path must reassemble to the canonical raw help-doc URL"
+    )
+    # The response contract: exactly one 200 response returning the raw
+    # markdown as a text/plain string. Without these checks, deleting the
+    # responses object or swapping the media type would leave the Action
+    # declaring a contract ChatGPT no longer receives.
+    responses = item["get"].get("responses", {})
+    assert list(responses.keys()) == ["200"], (
+        f"expected exactly one 200 response, got {list(responses)}"
+    )
+    content = responses["200"].get("content", {})
+    assert list(content.keys()) == ["text/plain"], (
+        f"the 200 response must declare exactly text/plain, got {list(content)}"
+    )
+    assert content["text/plain"].get("schema", {}).get("type") == "string", (
+        "the text/plain schema type must be 'string' so the Action hands"
+        " ChatGPT the raw markdown document"
     )
 
 
-_LLM_DIR = _REPO_ROOT / "scripts" / "release" / "public" / "llm"
-_LLM_README = _LLM_DIR / "README.md"
-_LANDING_PAGE = _REPO_ROOT / "scripts" / "release" / "public" / "site" / "index.html"
+# ---------------------------------------------------------------------------
+# Kit folder, landing page, and README link integrity.
 
 # Anchors the landing page must expose: the section itself plus one
-# subsection per supported provider (design decision 10 -- provider setup
-# steps live ONLY on the landing page, everything else links to these).
+# subsection per supported provider (provider setup steps live ONLY on the
+# landing page; everything else links to these).
 _REQUIRED_ANCHORS = (
     'id="llm-help"',
     'id="llm-chatgpt"',
@@ -102,7 +229,8 @@ _PLACEHOLDERS = ("<OR" "G>", "[support channel", "to be updated", "TODO")
 
 def test_help_kit_required_files_exist():
     assert _LLM_README.is_file(), f"missing {_LLM_README}"
-    assert _INSTRUCTIONS_TXT.is_file(), f"missing {_INSTRUCTIONS_TXT}"
+    assert _GPT_INSTRUCTIONS.is_file(), f"missing {_GPT_INSTRUCTIONS}"
+    assert _GPT_ACTION_SCHEMA.is_file(), f"missing {_GPT_ACTION_SCHEMA}"
     assert _HELP_DOC.is_file(), f"missing {_HELP_DOC}"
     assert _LANDING_PAGE.is_file(), f"missing {_LANDING_PAGE}"
 
@@ -118,15 +246,15 @@ def test_landing_page_has_all_provider_anchors():
 
 
 def test_help_kit_files_have_no_placeholders():
-    for path in (_LLM_README, _INSTRUCTIONS_TXT, _LANDING_PAGE):
+    for path in (_LLM_README, _GPT_INSTRUCTIONS, _GPT_ACTION_SCHEMA, _LANDING_PAGE):
         content = path.read_text(encoding="utf-8")
         offenders = [p for p in _PLACEHOLDERS if p in content]
         assert not offenders, f"{path.name} contains placeholders: {offenders}"
 
 
 def test_llm_readme_canonical_links_resolve():
-    """The llm README's two file links must resolve in the PUBLIC repo
-    layout: llm/ sits at the repo root, the canonical help doc ships at
+    """The llm README's file links must resolve in the PUBLIC repo layout:
+    llm/ sits at the repo root, the canonical help doc ships at
     services/wheelhouse/knowledge/. Map each public-relative link back to
     the dev tree and require the target to exist."""
     content = _LLM_README.read_text(encoding="utf-8")
@@ -134,14 +262,18 @@ def test_llm_readme_canonical_links_resolve():
         "llm/README.md no longer links the canonical help doc at its "
         "public-repo path (llm/.. -> services/wheelhouse/knowledge/)"
     )
-    assert "(./assistant-instructions.txt)" in content, (
-        "llm/README.md no longer links assistant-instructions.txt"
+    assert "(./gpt-instructions.txt)" in content, (
+        "llm/README.md no longer links gpt-instructions.txt"
+    )
+    assert "(./gpt-action-openapi.json)" in content, (
+        "llm/README.md no longer links gpt-action-openapi.json"
     )
     # Public "../services/..." resolves against the repo root; the dev-tree
-    # equivalent is _REPO_ROOT / services/... The sibling txt lives in the
+    # equivalent is _REPO_ROOT / services/... The GPT files live in the
     # same folder in both layouts.
     assert (_REPO_ROOT / "services/wheelhouse/knowledge/wheelhouse_help.md").is_file()
-    assert (_LLM_DIR / "assistant-instructions.txt").is_file()
+    assert _GPT_INSTRUCTIONS.is_file()
+    assert _GPT_ACTION_SCHEMA.is_file()
     # Every landing-page anchor the README links must exist on the page.
     html = _LANDING_PAGE.read_text(encoding="utf-8")
     for anchor in ("#llm-chatgpt", "#llm-gemini", "#llm-claude", "#llm-perplexity"):
@@ -149,20 +281,15 @@ def test_llm_readme_canonical_links_resolve():
         assert f'id="{anchor[1:]}"' in html, f"page lost the {anchor} target"
 
 
-# The exact public-repo blob URLs the landing page must link. Substring
+# The exact public-repo blob URL the landing page must link. Substring
 # checks are not enough: an href on the wrong host or a non-blob URL would
-# still contain the repo-relative path (codex review finding
-# wh-llm-help-kit.2.5), so these are matched against parsed href values.
+# still contain the repo-relative path, so this is matched against parsed
+# href values.
 _CANONICAL_HELP_URL = (
     "https://github.com/wheelhouse-project/WheelHouse/blob/main/"
     "services/wheelhouse/knowledge/wheelhouse_help.md"
 )
-_CANONICAL_TXT_URL = (
-    "https://github.com/wheelhouse-project/WheelHouse/blob/main/"
-    "llm/assistant-instructions.txt"
-)
 
-_PUBLIC_README = _REPO_ROOT / "scripts" / "release" / "public" / "README.md"
 _SITE_ANCHOR_URLS = tuple(
     f"https://wheelhouse-project.github.io/WheelHouse/#llm-{provider}"
     for provider in ("chatgpt", "gemini", "claude", "perplexity")
@@ -173,26 +300,23 @@ def _hrefs(html: str) -> list[str]:
     return re.findall(r'href="([^"]+)"', html)
 
 
-def test_landing_page_links_canonical_files():
-    """The landing page's two download links must be actual hrefs holding
-    the exact canonical blob URLs of the files this package ships."""
+def test_landing_page_links_canonical_help_doc():
+    """The landing page's download link must be an actual href holding the
+    exact canonical blob URL of the one file the kit ships."""
     hrefs = _hrefs(_LANDING_PAGE.read_text(encoding="utf-8"))
-    missing = [u for u in (_CANONICAL_HELP_URL, _CANONICAL_TXT_URL) if u not in hrefs]
-    assert not missing, (
-        f"landing page is missing canonical download hrefs: {missing}. "
-        f"Present hrefs to GitHub blobs: "
-        f"{[h for h in hrefs if 'blob' in h]}"
+    assert _CANONICAL_HELP_URL in hrefs, (
+        f"landing page is missing the canonical help-doc href. Present "
+        f"hrefs to GitHub blobs: {[h for h in hrefs if 'blob' in h]}"
     )
 
 
 def test_public_readme_help_kit_links_resolve():
     """The public README publishes the same help-kit links as the llm README:
-    the two files, the llm folder, and the four landing-page anchors. Each
-    anchor URL must target an id that exists on the landing page."""
+    the help document, the llm folder, and the four landing-page anchors.
+    Each anchor URL must target an id that exists on the landing page."""
     content = _PUBLIC_README.read_text(encoding="utf-8")
     for link in (
         "(./services/wheelhouse/knowledge/wheelhouse_help.md)",
-        "(./llm/assistant-instructions.txt)",
         "(./llm/README.md)",
     ):
         assert link in content, f"public README dropped the {link} link"

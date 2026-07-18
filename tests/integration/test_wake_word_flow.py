@@ -15,9 +15,17 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
 import pytest
 
-# Set up import paths for wheelhouse service modules
+# Set up import paths for wheelhouse service modules.
 _project_root = Path(__file__).parent.parent.parent
 _service_dir = _project_root / "services" / "wheelhouse"
+# The STT shared dir is needed only while importing shared_stt (its modules
+# use absolute intra-package imports like "from shared_stt.redact import
+# ..."), and it must NOT stay on sys.path: it carries a regular "tests"
+# package (tests/__init__.py) that would shadow the repo-root "tests"
+# namespace package and break tests/speech/conftest.py's
+# "import tests.speech". The detector fixture below adds it, imports, and
+# removes it again.
+_stt_shared_dir = _project_root / "services" / "stt_providers" / "shared"
 for _p in (_project_root, _service_dir):
     _s = str(_p)
     if _s not in sys.path:
@@ -260,8 +268,21 @@ class TestWakeWordDetector:
 
     @pytest.fixture(autouse=True)
     def _import_wwd(self):
-        """Import wake_word_detector once for all tests in this class."""
-        from services.stt_providers.shared.shared_stt import wake_word_detector as wwd
+        """Import wake_word_detector once for all tests in this class.
+
+        Imported via the shared_stt spelling with the STT shared dir on
+        sys.path only for the duration of the import (see the module
+        docstring note on the "tests" package shadowing hazard). The
+        modules stay cached in sys.modules afterwards, so repeated fixture
+        runs are cheap and consistent.
+        """
+        _stt = str(_stt_shared_dir)
+        sys.path.insert(0, _stt)
+        try:
+            from shared_stt import wake_word_detector as wwd
+        finally:
+            if _stt in sys.path:
+                sys.path.remove(_stt)
         self.wwd = wwd
 
     def test_detector_not_loaded_without_openwakeword(self):

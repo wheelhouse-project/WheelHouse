@@ -50,8 +50,16 @@ initial_noise_floor = 0.01
 
 [hotwords]
 # Decoder bias built from shared/hints.txt (the "x-ray boost" hints).
-# Set false if hint words start appearing in unrelated speech -- that
-# turns off the bias for THIS provider only, without touching
-# hints.txt (which also feeds Google STT phrase adaptation and the
-# parakeet provider). Takes effect at the next service restart.
-enabled = true
+# OFF, and stay off: distil-medium.en cannot take a word-list bias
+# prompt. Measured 2026-07-17 (wh-distil-hotwords-decode-collapse):
+# with 10 hints (~70 chars) the model returns ZERO segments on clean
+# evaluation-corpus speech; with the live ~99-hint list every live
+# utterance decoded empty and was suppressed by the hallucination
+# filter -- the provider was completely unusable. Even 5 hints cut the
+# peak log-probability from -0.19 to -0.36, most of the way to the
+# -0.55 suppression threshold. Hints saved by "x-ray boost" still
+# apply to Google STT (phrase adaptation) and Parakeet (sherpa-onnx
+# hotwords), which use different mechanisms. Only enable this for
+# experiments, and verify decode quality with your hint list first.
+# Takes effect at the next service restart.
+enabled = false

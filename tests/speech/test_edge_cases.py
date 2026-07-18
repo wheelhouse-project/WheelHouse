@@ -146,26 +146,33 @@ async def test_period_replacement_executes(processor, mock_app):
     """Test that 'period' replacement pattern works correctly.
 
     Mid-utterance replacements buffer and wait for timeout before executing.
+    Timeout finalization is sentinel-based (wh-oe7u.4): the timeout task
+    enqueues a sentinel that the processing loop consumes, so the loop must
+    be running for the timeout to take effect.
     """
-    # Send "period" mid-utterance
-    await processor.process_word_event(
-        WordEvent("hello", start_of_utterance=True, end_of_utterance=False)
-    )
-    await processor.process_word_event(
-        WordEvent("period", start_of_utterance=False, end_of_utterance=False)
-    )
+    await processor.start()
+    try:
+        # Send "period" mid-utterance
+        await processor.process_word_event(
+            WordEvent("hello", start_of_utterance=True, end_of_utterance=False)
+        )
+        await processor.process_word_event(
+            WordEvent("period", start_of_utterance=False, end_of_utterance=False)
+        )
 
-    # Mid-utterance replacement buffers
-    assert processor.mode == ProcessingMode.REPLACEMENT_BUFFERING
+        # Mid-utterance replacement buffers
+        assert processor.mode == ProcessingMode.REPLACEMENT_BUFFERING
 
-    # Wait for timeout to fire
-    await asyncio.sleep(0.5)  # Wait for 400ms replacement timeout
+        # Wait for timeout to fire
+        await asyncio.sleep(0.5)  # Wait for 400ms replacement timeout
 
-    # After timeout, should be back in IDLE
-    assert processor.mode == ProcessingMode.IDLE
+        # After timeout, should be back in IDLE
+        assert processor.mode == ProcessingMode.IDLE
 
-    # Check that both hello (dictation) and period (replacement) were executed
-    assert mock_app.call_count >= 1, "Period pattern did not execute"
+        # Check that both hello (dictation) and period (replacement) were executed
+        assert mock_app.call_count >= 1, "Period pattern did not execute"
+    finally:
+        await processor.stop()
 
 
 # ============================================================================
@@ -174,36 +181,54 @@ async def test_period_replacement_executes(processor, mock_app):
 
 @pytest.mark.asyncio
 async def test_buffer_cleared_after_command_execution(processor, mock_app):
-    """Test that buffer is cleared after command executes."""
-    await processor.process_word_event(
-        WordEvent("browser", start_of_utterance=True, end_of_utterance=False)
-    )
+    """Test that buffer is cleared after command executes.
 
-    # "browser" is a fresh command, so it buffers first
-    assert processor.mode == ProcessingMode.COMMAND_BUFFERING
+    Uses "delete" (optional count parameter, no hotword requirement) --
+    "browser" now carries requires_hotword=True (wh-qj70s) and no longer
+    buffers without the hotword. The loop must run for the sentinel-based
+    timeout finalization (wh-oe7u.4).
+    """
+    await processor.start()
+    try:
+        await processor.process_word_event(
+            WordEvent("delete", start_of_utterance=True, end_of_utterance=False)
+        )
 
-    # Wait for command timeout to fire
-    await asyncio.sleep(1.1)  # Wait for 1000ms command timeout
+        # "delete" is a fresh command with an optional count, so it buffers
+        assert processor.mode == ProcessingMode.COMMAND_BUFFERING
 
-    # After timeout, should be back in IDLE with cleared buffer
-    assert processor.mode == ProcessingMode.IDLE
-    assert len(processor.buffer) == 0
+        # Wait for command timeout to fire
+        await asyncio.sleep(1.1)  # Wait for 1000ms command timeout
+
+        # After timeout, should be back in IDLE with cleared buffer
+        assert processor.mode == ProcessingMode.IDLE
+        assert len(processor.buffer) == 0
+    finally:
+        await processor.stop()
 
 
 @pytest.mark.asyncio
 async def test_buffer_cleared_after_replacement_execution(processor, mock_app):
-    """Test that buffer is cleared after replacement executes."""
-    await processor.process_word_event(
-        WordEvent("hello", start_of_utterance=True, end_of_utterance=False)
-    )
-    await processor.process_word_event(
-        WordEvent("period", start_of_utterance=False, end_of_utterance=False)
-    )
-    
-    # Wait for timeout
-    await asyncio.sleep(0.5)
-    
-    assert len(processor.buffer) == 0
+    """Test that buffer is cleared after replacement executes.
+
+    The loop must run for the sentinel-based timeout finalization
+    (wh-oe7u.4).
+    """
+    await processor.start()
+    try:
+        await processor.process_word_event(
+            WordEvent("hello", start_of_utterance=True, end_of_utterance=False)
+        )
+        await processor.process_word_event(
+            WordEvent("period", start_of_utterance=False, end_of_utterance=False)
+        )
+
+        # Wait for timeout
+        await asyncio.sleep(0.5)
+
+        assert len(processor.buffer) == 0
+    finally:
+        await processor.stop()
 
 
 # ============================================================================
@@ -214,11 +239,12 @@ async def test_buffer_cleared_after_replacement_execution(processor, mock_app):
 async def test_timeout_cancelled_on_early_completion(processor, mock_app):
     """Test that timeout is cancelled when pattern completes early via EOI.
 
-    Send "browser" as fresh command, then end-of-utterance to force
-    early finalization which should cancel the timeout.
+    Send "delete" as fresh command ("browser" now requires the hotword,
+    wh-qj70s), then end-of-utterance to force early finalization which
+    should cancel the timeout.
     """
     await processor.process_word_event(
-        WordEvent("browser", start_of_utterance=True, end_of_utterance=False)
+        WordEvent("delete", start_of_utterance=True, end_of_utterance=False)
     )
 
     # Should be buffering
@@ -236,44 +262,59 @@ async def test_timeout_cancelled_on_early_completion(processor, mock_app):
 
 @pytest.mark.asyncio
 async def test_command_timeout_fires_after_wait(processor, mock_app):
-    """Test that command patterns wait for timeout if incomplete."""
-    await processor.process_word_event(
-        WordEvent("delete", start_of_utterance=True, end_of_utterance=False)
-    )
-    
-    # Should buffer (has optional parameter)
-    assert processor.mode == ProcessingMode.COMMAND_BUFFERING
-    assert processor.timeout_task is not None
-    
-    # Wait for timeout
-    await asyncio.sleep(1.1)
-    
-    # Should have finalized
-    assert processor.mode == ProcessingMode.IDLE
-    assert mock_app.call_count > 0
+    """Test that command patterns wait for timeout if incomplete.
+
+    The loop must run for the sentinel-based timeout finalization
+    (wh-oe7u.4).
+    """
+    await processor.start()
+    try:
+        await processor.process_word_event(
+            WordEvent("delete", start_of_utterance=True, end_of_utterance=False)
+        )
+
+        # Should buffer (has optional parameter)
+        assert processor.mode == ProcessingMode.COMMAND_BUFFERING
+        assert processor.timeout_task is not None
+
+        # Wait for timeout
+        await asyncio.sleep(1.1)
+
+        # Should have finalized
+        assert processor.mode == ProcessingMode.IDLE
+        assert mock_app.call_count > 0
+    finally:
+        await processor.stop()
 
 
 @pytest.mark.asyncio
 async def test_replacement_timeout_fires_after_wait(processor, mock_app):
     """Test that multi-word replacement patterns wait for timeout.
-    
-    Using a multi-word replacement prefix word as the example.
+
+    Uses "new" (prefix of the "new line" / "new paragraph" replacements)
+    -- the earlier example word was a personal-name pattern removed in the
+    sanitize sweep. The loop must run for the sentinel-based timeout
+    finalization (wh-oe7u.4).
     """
-    await processor.process_word_event(
-        WordEvent("hello", start_of_utterance=True, end_of_utterance=False)
-    )
-    await processor.process_word_event(
-        WordEvent("david", start_of_utterance=False, end_of_utterance=False)
-    )
-    
-    # Should buffer (multi-word replacement pattern)
-    assert processor.mode == ProcessingMode.REPLACEMENT_BUFFERING
-    
-    # Wait for replacement timeout (400ms)
-    await asyncio.sleep(0.5)
-    
-    # Should have finalized
-    assert processor.mode == ProcessingMode.IDLE
+    await processor.start()
+    try:
+        await processor.process_word_event(
+            WordEvent("hello", start_of_utterance=True, end_of_utterance=False)
+        )
+        await processor.process_word_event(
+            WordEvent("new", start_of_utterance=False, end_of_utterance=False)
+        )
+
+        # Should buffer (multi-word replacement pattern)
+        assert processor.mode == ProcessingMode.REPLACEMENT_BUFFERING
+
+        # Wait for replacement timeout (400ms)
+        await asyncio.sleep(0.5)
+
+        # Should have finalized
+        assert processor.mode == ProcessingMode.IDLE
+    finally:
+        await processor.stop()
 
 
 # ============================================================================
@@ -324,17 +365,18 @@ async def test_fresh_non_catalog_passthroughs(processor, mock_app):
 @pytest.mark.asyncio
 async def test_mid_utterance_replacement_buffers(processor, mock_app):
     """Test that multi-word replacement words mid-utterance buffer.
-    
-    Using a multi-word replacement prefix - 'david' should start buffering.
+
+    Using a multi-word replacement prefix - 'new' should start buffering.
     """
     await processor.process_word_event(
         WordEvent("hello", start_of_utterance=True, end_of_utterance=False)
     )
     await processor.process_word_event(
-        WordEvent("david", start_of_utterance=False, end_of_utterance=False)
+        WordEvent("new", start_of_utterance=False, end_of_utterance=False)
     )
-    
-    # "david" should buffer (multi-word replacement pattern)
+
+    # "new" should buffer (prefix of the "new line" / "new paragraph"
+    # multi-word replacement patterns)
     assert processor.mode == ProcessingMode.REPLACEMENT_BUFFERING
 
 
@@ -366,10 +408,14 @@ async def test_quotes_pattern_parameter_substitution(processor, mock_app):
     
     # Should buffer (greedy pattern)
     assert processor.mode == ProcessingMode.REPLACEMENT_BUFFERING
-    
-    # Wait for timeout (greedy pattern needs timeout to finalize)
-    await asyncio.sleep(0.8)
-    
+
+    # Greedy patterns finalize on end-of-utterance (the greedy timeout
+    # defaults to 5000ms, wh-oe7u.4); send an explicit EOI like the
+    # maintained e2e suite does.
+    await processor.process_word_event(
+        WordEvent("", start_of_utterance=False, end_of_utterance=True)
+    )
+
     # Should have executed
     assert processor.mode == ProcessingMode.IDLE
     assert mock_app.call_count > 0, "Pattern did not execute"

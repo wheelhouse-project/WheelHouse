@@ -5,6 +5,38 @@ All notable changes to WheelHouse are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-07-18
+
+### Added
+
+- The project website now carries a full documentation page rendered
+  directly from the shipped help document, so the site and the in-app
+  help can never disagree.
+- The `llm/` folder now ships the official WheelHouse Helper GPT files
+  (`gpt-instructions.txt` and `gpt-action-openapi.json`), so you can
+  build a ChatGPT GPT that always answers from the latest released help
+  document.
+
+### Fixed
+
+- On the Distil-Whisper speech engine, an internal vocabulary-biasing
+  feature could garble or drop transcription entirely; it is now
+  disabled on that engine.
+- A five-domain accuracy audit checked the help document against the
+  current code and corrected eight inaccuracies, covering voice
+  commands, configuration, installation, speech engines, and the AI
+  subsystem.
+
+### Changed
+
+- The help document is now the single source of truth for using and
+  installing WheelHouse: `INSTALL.md` is generated from its
+  installation sections (and gained a Speech Engines and Accounts
+  overview), and the assistant instructions that previously shipped as
+  a separate `llm/assistant-instructions.txt` are now embedded in the
+  help document itself -- the `llm/` kit is a single file plus the GPT
+  files above.
+
 ## [1.0.2] - 2026-07-17
 
 ### Added

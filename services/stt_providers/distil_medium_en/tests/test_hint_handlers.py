@@ -117,6 +117,23 @@ class TestHandleAddHint:
         notification = server.forwarder.send_notification.call_args[0]
         assert "saved" in notification[1].lower()
         assert "restarting" not in notification[1].lower()
+        # wh-distil-hotwords-decode-collapse: the bias breaks decoding
+        # on this model, so the notice must not tell the user to enable
+        # it. The hint still helps the engines that read hints.txt.
+        assert "enable" not in notification[1].lower()
+
+    def test_missing_hotwords_section_gates_off(
+        self, server, hints_stub, flag_path, monkeypatch
+    ):
+        # wh-distil-hotwords-decode-collapse: a config.toml with no
+        # [hotwords] section means OFF -- the bias collapses decoding,
+        # so absence of explicit opt-in must not restart the service.
+        monkeypatch.setattr(distil_main, "load_config", lambda: {})
+        server.hotwords_enabled = True  # stale cache must not win
+        assert server._hotwords_enabled_now() is False
+        server._handle_add_hint("Zwicky")
+        server.stop.assert_not_called()
+        assert not flag_path.exists()
 
     def test_stale_disabled_cache_updates_from_config(
         self, server, hints_stub, flag_path
