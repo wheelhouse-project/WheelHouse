@@ -50,16 +50,16 @@ The installer reports each step as it goes. If it reached the speech-engine ques
 
 Every failure message the installer prints is designed to be understandable and safe to share. The common ones:
 
-- **"WheelHouse appears to be running"** (during an update): the installer refuses to replace an app that is running. Exit WheelHouse first -- right-click the WheelHouse tray icon and choose Exit -- then run the installer again. If it says it could not even check whether WheelHouse is running, close WheelHouse or restart the computer, then try again.
+- **"WheelHouse appears to be running"** (during an update): the installer refuses to replace an app that is running. Exit WheelHouse first (right-click the tray icon, choose Exit), then run the installer again. If it says it could not even check, restart the computer and try again.
 - **"This computer has N GB of memory"**: your machine is below the 8 GB minimum. This check stops the install for every speech engine, including the cloud one, so adding memory is the only fix.
 - **"Not enough free disk space"**: free up 10 GB on the Windows drive and run the installer again.
 - **"tar.exe was not found"**: only affects Windows 10 versions from before 2018, which lack the tool that unpacks the speech model. Install tar yourself, or choose the Google Cloud engine (which needs no model download).
 - **"Could not install uv"**: usually a blocked network -- corporate proxies can block the download. Install uv manually from https://docs.astral.sh/uv/getting-started/installation/ and run the installer again.
 - **"... failed its integrity check"**: the downloaded file does not match its published fingerprint. An antivirus or proxy rewriting downloads is the most common cause; a changed release asset is the other. Add an exception or try a different network, and if it keeps failing, file an issue on the GitHub page.
 - **"Downloading ... failed twice"**: network trouble. Run the installer again -- downloads resume where they left off.
-- **"Setting up services/... failed"**: a Python environment could not be built. If the message shows a "uv sync exit code", it is usually a network or proxy problem -- check the connection and run the installer again (it picks up where it left off). If it says a path "is missing or is not a folder", the unpacked files are incomplete or were quarantined -- run the installer again, and check whether antivirus is removing files.
-- **"An incomplete speech model was found"**: informational, not an error. A previous unpacking was interrupted; the installer removes the incomplete files and unpacks again from the archive it already has. The 650 MB download does not repeat unless the downloaded file itself is damaged.
-- **No WheelHouse entry in the Start menu**: check Start > All apps under W first -- new entries are not pinned to the front page. If it is truly absent, the desktop shortcut works the same, and the installer's log records a "Shortcut created" or "Could not create" line you can paste into a help request.
+- **"Setting up services/... failed"**: a Python environment could not be built. If the message shows a "uv sync exit code", it is usually a network or proxy problem -- check the connection and run the installer again (it picks up where it left off). If it says a path "is missing or is not a folder", the unpacked files are incomplete or were quarantined -- run the installer again and check whether antivirus is removing files.
+- **"An incomplete speech model was found"**: informational, not an error. A previous unpacking was interrupted; the installer removes the incomplete files and unpacks again from the archive it already has. The 650 MB download only repeats if the archive itself is damaged.
+- **No WheelHouse entry in the Start menu**: check Start > All apps under W first -- new entries are not pinned to the front page. If it is truly absent, the desktop shortcut works the same; the installer log records a "Shortcut created" or "Could not create" line for a help request.
 
 **Re-running the installer is always safe.** It repairs a broken install, resumes interrupted downloads, and updates an existing install while preserving your settings, your personal voice patterns, your approved dictation targets, your saved speech hints, and the downloaded speech model. You cannot make things worse by running it again -- when in doubt, re-run it.
 
@@ -75,15 +75,15 @@ An update replaces the application but keeps everything that is yours:
 - Your saved speech hints
 - The downloaded speech model -- it is stored outside the part an update replaces, so the roughly 650 MB download does not repeat
 
-**If an update is interrupted** -- a power cut, a closed window, a crash -- your personal files are safe. Before replacing anything, the installer copies them into a holding folder next to the application, and the next run restores whatever it finds there. Recovery is simply running the same command again; nothing manual is needed.
+**If an update is interrupted** -- a power cut, a closed window, a crash -- your personal files are safe. Before replacing anything, the installer copies them into a holding folder next to the application, and the next run restores whatever it finds there. Recovery is running the same command again; nothing manual is needed.
 
 ### Security warnings you may see
 
 The WheelHouse installer is digitally signed by the project's author, David Chesley Hite III, so Windows can verify the download came from the project unaltered. Windows may still warn you for a while after each new release, until it has seen the new file often enough. The complete source code is public at https://github.com/wheelhouse-project/WheelHouse, so anyone can inspect exactly what it does.
 
-- **SmartScreen ("Windows protected your PC")**: can appear when you run a freshly released WheelHouse-Setup.exe. Click "More info", check that the publisher reads David Chesley Hite III, then click "Run anyway". If the setup wizard later runs into trouble, it always writes a log file at `%TEMP%\Setup Log <date> #<number>.txt` -- paste that into a help request.
-- **Antivirus flags or rewrites the download**: some antivirus products quarantine downloads or alter them as they arrive. The installer checks every file it downloads against a published fingerprint and refuses anything that does not match, so a changed file cannot be installed -- instead you see a message saying a download "failed its integrity check". An antivirus or proxy altering the file is the most common cause. Add an exception for WheelHouse, or install on a different network, then run the installer again.
-- **A downloaded script will not run**: if you saved install-wheelhouse.ps1 as a file (for example, to uninstall) instead of using the one-line command, Windows marks the file as coming from the internet and PowerShell may refuse to run it. Two equally good fixes: remove the mark once with `Unblock-File .\install-wheelhouse.ps1`, or start it with `powershell -ExecutionPolicy Bypass -File .\install-wheelhouse.ps1`.
+- **SmartScreen ("Windows protected your PC")**: can appear when you run a freshly released WheelHouse-Setup.exe. Click "More info", check that the publisher reads David Chesley Hite III, then click "Run anyway". If the setup wizard runs into trouble, it writes a log at `%TEMP%\Setup Log <date> #<number>.txt` -- paste that into a help request.
+- **Antivirus flags or rewrites the download**: some antivirus products quarantine downloads or alter them as they arrive. The installer verifies every download against a published fingerprint and refuses anything altered (the "failed its integrity check" message). Add an exception for WheelHouse, or install on a different network, then run the installer again.
+- **A downloaded script will not run**: if you saved install-wheelhouse.ps1 as a file (for example, to uninstall) instead of using the one-line command, Windows marks the file as coming from the internet and PowerShell may refuse to run it. Either remove the mark once with `Unblock-File .\install-wheelhouse.ps1`, or start it with `powershell -ExecutionPolicy Bypass -File .\install-wheelhouse.ps1`.
 
 If you would rather not click through security warnings, read the code and install from source: CONTRIBUTING.md in the GitHub repository has the development setup steps.
 
@@ -116,7 +116,7 @@ The trade-off is one Windows rule you will occasionally run into. Windows does n
 - **Programs running as administrator.** If you started a program with "Run as administrator" (or it elevated itself, as some system tools do), WheelHouse cannot type into it, press keys in it, or click its buttons.
 - **UAC prompts.** The dimmed "Do you want to allow this app to make changes to your device?" screen is even more protected: Windows shows it on a separate secure desktop that no ordinary program can reach or even see.
 
-**What it looks like:** for dictation and keystroke commands, nothing -- you speak and the words simply have no effect in that window, with no error message. Click commands do show a notice: WheelHouse cannot see inside the protected window, so "click cancel" reports no match. If WheelHouse suddenly seems to have stopped working, check whether the window you are in is running as administrator. Click into any normal window (Notepad, your browser) and WheelHouse works there immediately, because WheelHouse itself never stopped -- only that one window was out of reach.
+**What it looks like:** for dictation and keystroke commands, nothing -- you speak and the words have no effect in that window, with no error message. Click commands do show a notice: WheelHouse cannot see inside the protected window, so "click cancel" reports no match. If WheelHouse suddenly seems to have stopped working, check whether the window you are in is running as administrator. Click into any normal window (Notepad, your browser) and WheelHouse works there immediately, because WheelHouse itself never stopped -- only that one window was out of reach.
 
 **What to do:**
 
@@ -135,7 +135,7 @@ The one situation where an account comes up: you picked the **Google Cloud** spe
 
 There is also a third option for computers with an NVIDIA graphics card that has at least 4 GB of dedicated memory: **Distil-Whisper**, which runs locally on the graphics card. The installer offers it only when it detects a suitable card. It downloads its own model the first time it starts, so the first launch takes a few minutes.
 
-### Local versus cloud, honestly compared
+### Local versus cloud, compared
 
 | Aspect | Local engines (Parakeet, Distil-Whisper) | Cloud engine (Google Cloud) |
 |---|---|---|

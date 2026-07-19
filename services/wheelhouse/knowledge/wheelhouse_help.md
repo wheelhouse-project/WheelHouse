@@ -13,7 +13,7 @@ Behavior rules:
 - If the user seems non-technical, avoid jargon. Use analogies.
 - If unsure whether the user wants a quick or detailed answer, ask:
   "Would you like a quick answer or a deeper explanation?"
-- For someone deciding whether to install: answer honestly from the "What Is
+- For someone deciding whether to install: answer accurately from the "What Is
   WheelHouse", "Can My Computer Handle WheelHouse", "Speech Engines and
   Accounts", and "Getting Started" sections. Be candid about hardware limits
   and rough edges. Never oversell.
@@ -35,7 +35,7 @@ Behavior rules:
 - When describing voice commands, always give an example of what to say.
 - When a user seems overwhelmed, direct them to the "Day 1 Quick Start" section
   and tell them to ignore everything else until they're comfortable.
-- When a user asks about hardware or performance, be honest about limitations.
+- When a user asks about hardware or performance, be direct about limitations.
   Don't promise it will work on every machine.
 - Greet the user and ask what they need help with.
 
@@ -43,7 +43,7 @@ Behavior rules:
 
 ## What Is WheelHouse
 
-WheelHouse gives you hands-free control of your Windows PC by voice. You speak, and your computer responds: dictate text into any application, issue commands, switch windows, launch programs, and click on-screen buttons by name -- all without touching the keyboard or mouse. If you use a mouse with a thumb wheel, WheelHouse can also put screen brightness and volume on that wheel.
+WheelHouse gives you hands-free control of your Windows PC by voice. You speak, and your computer responds: dictate text into any application, issue commands, switch windows, launch programs, and click on-screen buttons by name -- all without touching the keyboard or mouse. If you use a Logitech MX-series mouse, WheelHouse can also put screen brightness and volume on its thumb wheel.
 
 **Who is it for?** Anyone who wants a faster, more natural, hands-free way to work. It is equally serious assistive technology: if using a keyboard and mouse is painful, difficult, or impossible, WheelHouse aims to give you the whole computer by voice.
 
@@ -58,7 +58,7 @@ That is the whole list. The installer brings everything else WheelHouse needs, c
 
 **How it works, in one paragraph.** You speak into your microphone. WheelHouse turns your words into text on your own computer, then decides what you meant. If it sounds like a command ("undo", "select all"), WheelHouse carries it out immediately. Otherwise it treats your words as dictation and types them into whatever window you are working in -- a document, an email, a chat box -- with capitalization and spacing handled automatically. Punctuation is spoken: say "comma" or "period" and the symbol appears. Words show up as you talk, usually starting within about two seconds, and keep flowing while you speak instead of arriving all at once after you stop.
 
-**An honest note.** WheelHouse is a young open-source project with a single primary author. Reliability is its first value and it is the author's daily driver, but it has been tested on a limited set of machines so far, so you may meet rough edges on hardware or applications it has not seen. If something fails for you, that report is genuinely wanted: https://github.com/wheelhouse-project/WheelHouse
+**Fair warning.** WheelHouse is a young open-source project with a single primary author. Reliability is its first value and it is the author's daily driver, but it has been tested on a limited set of machines, so you may meet rough edges on hardware or applications it has not seen. If something fails for you, that report is wanted: https://github.com/wheelhouse-project/WheelHouse
 
 ---
 
@@ -135,16 +135,16 @@ The installer reports each step as it goes. If it reached the speech-engine ques
 
 Every failure message the installer prints is designed to be understandable and safe to share. The common ones:
 
-- **"WheelHouse appears to be running"** (during an update): the installer refuses to replace an app that is running. Exit WheelHouse first -- right-click the WheelHouse tray icon and choose Exit -- then run the installer again. If it says it could not even check whether WheelHouse is running, close WheelHouse or restart the computer, then try again.
+- **"WheelHouse appears to be running"** (during an update): the installer refuses to replace an app that is running. Exit WheelHouse first (right-click the tray icon, choose Exit), then run the installer again. If it says it could not even check, restart the computer and try again.
 - **"This computer has N GB of memory"**: your machine is below the 8 GB minimum. This check stops the install for every speech engine, including the cloud one, so adding memory is the only fix.
 - **"Not enough free disk space"**: free up 10 GB on the Windows drive and run the installer again.
 - **"tar.exe was not found"**: only affects Windows 10 versions from before 2018, which lack the tool that unpacks the speech model. Install tar yourself, or choose the Google Cloud engine (which needs no model download).
 - **"Could not install uv"**: usually a blocked network -- corporate proxies can block the download. Install uv manually from https://docs.astral.sh/uv/getting-started/installation/ and run the installer again.
 - **"... failed its integrity check"**: the downloaded file does not match its published fingerprint. An antivirus or proxy rewriting downloads is the most common cause; a changed release asset is the other. Add an exception or try a different network, and if it keeps failing, file an issue on the GitHub page.
 - **"Downloading ... failed twice"**: network trouble. Run the installer again -- downloads resume where they left off.
-- **"Setting up services/... failed"**: a Python environment could not be built. If the message shows a "uv sync exit code", it is usually a network or proxy problem -- check the connection and run the installer again (it picks up where it left off). If it says a path "is missing or is not a folder", the unpacked files are incomplete or were quarantined -- run the installer again, and check whether antivirus is removing files.
-- **"An incomplete speech model was found"**: informational, not an error. A previous unpacking was interrupted; the installer removes the incomplete files and unpacks again from the archive it already has. The 650 MB download does not repeat unless the downloaded file itself is damaged.
-- **No WheelHouse entry in the Start menu**: check Start > All apps under W first -- new entries are not pinned to the front page. If it is truly absent, the desktop shortcut works the same, and the installer's log records a "Shortcut created" or "Could not create" line you can paste into a help request.
+- **"Setting up services/... failed"**: a Python environment could not be built. If the message shows a "uv sync exit code", it is usually a network or proxy problem -- check the connection and run the installer again (it picks up where it left off). If it says a path "is missing or is not a folder", the unpacked files are incomplete or were quarantined -- run the installer again and check whether antivirus is removing files.
+- **"An incomplete speech model was found"**: informational, not an error. A previous unpacking was interrupted; the installer removes the incomplete files and unpacks again from the archive it already has. The 650 MB download only repeats if the archive itself is damaged.
+- **No WheelHouse entry in the Start menu**: check Start > All apps under W first -- new entries are not pinned to the front page. If it is truly absent, the desktop shortcut works the same; the installer log records a "Shortcut created" or "Could not create" line for a help request.
 
 **Re-running the installer is always safe.** It repairs a broken install, resumes interrupted downloads, and updates an existing install while preserving your settings, your personal voice patterns, your approved dictation targets, your saved speech hints, and the downloaded speech model. You cannot make things worse by running it again -- when in doubt, re-run it.
 
@@ -166,7 +166,7 @@ An update replaces the application but keeps everything that is yours:
 - Your saved speech hints
 - The downloaded speech model -- it is stored outside the part an update replaces, so the roughly 650 MB download does not repeat
 
-**If an update is interrupted** -- a power cut, a closed window, a crash -- your personal files are safe. Before replacing anything, the installer copies them into a holding folder next to the application, and the next run restores whatever it finds there. Recovery is simply running the same command again; nothing manual is needed.
+**If an update is interrupted** -- a power cut, a closed window, a crash -- your personal files are safe. Before replacing anything, the installer copies them into a holding folder next to the application, and the next run restores whatever it finds there. Recovery is running the same command again; nothing manual is needed.
 
 <!-- install-doc:end -->
 
@@ -176,9 +176,9 @@ An update replaces the application but keeps everything that is yours:
 
 The WheelHouse installer is digitally signed by the project's author, David Chesley Hite III, so Windows can verify the download came from the project unaltered. Windows may still warn you for a while after each new release, until it has seen the new file often enough. The complete source code is public at https://github.com/wheelhouse-project/WheelHouse, so anyone can inspect exactly what it does.
 
-- **SmartScreen ("Windows protected your PC")**: can appear when you run a freshly released WheelHouse-Setup.exe. Click "More info", check that the publisher reads David Chesley Hite III, then click "Run anyway". If the setup wizard later runs into trouble, it always writes a log file at `%TEMP%\Setup Log <date> #<number>.txt` -- paste that into a help request.
-- **Antivirus flags or rewrites the download**: some antivirus products quarantine downloads or alter them as they arrive. The installer checks every file it downloads against a published fingerprint and refuses anything that does not match, so a changed file cannot be installed -- instead you see a message saying a download "failed its integrity check". An antivirus or proxy altering the file is the most common cause. Add an exception for WheelHouse, or install on a different network, then run the installer again.
-- **A downloaded script will not run**: if you saved install-wheelhouse.ps1 as a file (for example, to uninstall) instead of using the one-line command, Windows marks the file as coming from the internet and PowerShell may refuse to run it. Two equally good fixes: remove the mark once with `Unblock-File .\install-wheelhouse.ps1`, or start it with `powershell -ExecutionPolicy Bypass -File .\install-wheelhouse.ps1`.
+- **SmartScreen ("Windows protected your PC")**: can appear when you run a freshly released WheelHouse-Setup.exe. Click "More info", check that the publisher reads David Chesley Hite III, then click "Run anyway". If the setup wizard runs into trouble, it writes a log at `%TEMP%\Setup Log <date> #<number>.txt` -- paste that into a help request.
+- **Antivirus flags or rewrites the download**: some antivirus products quarantine downloads or alter them as they arrive. The installer verifies every download against a published fingerprint and refuses anything altered (the "failed its integrity check" message). Add an exception for WheelHouse, or install on a different network, then run the installer again.
+- **A downloaded script will not run**: if you saved install-wheelhouse.ps1 as a file (for example, to uninstall) instead of using the one-line command, Windows marks the file as coming from the internet and PowerShell may refuse to run it. Either remove the mark once with `Unblock-File .\install-wheelhouse.ps1`, or start it with `powershell -ExecutionPolicy Bypass -File .\install-wheelhouse.ps1`.
 
 If you would rather not click through security warnings, read the code and install from source: CONTRIBUTING.md in the GitHub repository has the development setup steps.
 
@@ -219,7 +219,7 @@ The trade-off is one Windows rule you will occasionally run into. Windows does n
 - **Programs running as administrator.** If you started a program with "Run as administrator" (or it elevated itself, as some system tools do), WheelHouse cannot type into it, press keys in it, or click its buttons.
 - **UAC prompts.** The dimmed "Do you want to allow this app to make changes to your device?" screen is even more protected: Windows shows it on a separate secure desktop that no ordinary program can reach or even see.
 
-**What it looks like:** for dictation and keystroke commands, nothing -- you speak and the words simply have no effect in that window, with no error message. Click commands do show a notice: WheelHouse cannot see inside the protected window, so "click cancel" reports no match. If WheelHouse suddenly seems to have stopped working, check whether the window you are in is running as administrator. Click into any normal window (Notepad, your browser) and WheelHouse works there immediately, because WheelHouse itself never stopped -- only that one window was out of reach.
+**What it looks like:** for dictation and keystroke commands, nothing -- you speak and the words have no effect in that window, with no error message. Click commands do show a notice: WheelHouse cannot see inside the protected window, so "click cancel" reports no match. If WheelHouse suddenly seems to have stopped working, check whether the window you are in is running as administrator. Click into any normal window (Notepad, your browser) and WheelHouse works there immediately, because WheelHouse itself never stopped -- only that one window was out of reach.
 
 **What to do:**
 
@@ -264,7 +264,7 @@ The one situation where an account comes up: you picked the **Google Cloud** spe
 
 There is also a third option for computers with an NVIDIA graphics card that has at least 4 GB of dedicated memory: **Distil-Whisper**, which runs locally on the graphics card. The installer offers it only when it detects a suitable card. It downloads its own model the first time it starts, so the first launch takes a few minutes.
 
-### Local versus cloud, honestly compared
+### Local versus cloud, compared
 
 | Aspect | Local engines (Parakeet, Distil-Whisper) | Cloud engine (Google Cloud) |
 |---|---|---|
@@ -309,7 +309,7 @@ The same re-run is the repair path when the speech model is missing or incomplet
 
 ## Can My Computer Handle WheelHouse?
 
-An honest answer, because nothing is worse than installing something and finding it unusable.
+A straight answer, because nothing is worse than installing something and finding it unusable.
 
 ### Minimum
 
@@ -336,7 +336,7 @@ Where a GPU helps most is on a machine whose processor is older or slower: if yo
 
 - **If your computer runs Chrome with a handful of tabs and a Zoom call at the same time without struggling, WheelHouse should work fine.** That is the practical baseline.
 - If your computer already feels sluggish at basic tasks -- slow window switching, laggy typing in the browser -- expect noticeable delays in WheelHouse too. It will still work; it will just feel slow.
-- The honest test is simply to try it: installation is free, safe to re-run, and easy to uninstall. If dictated words regularly take 3-4 seconds or more to appear, switch to a different engine (see Speech Engines and Accounts) rather than giving up.
+- The real test is to try it: installation is free, safe to re-run, and easy to uninstall. If dictated words regularly take 3-4 seconds or more to appear, switch to a different engine (see Speech Engines and Accounts) rather than giving up.
 
 ### What speed to expect
 
@@ -587,7 +587,7 @@ Window management and Windows itself.
 
 #### Mouse Control
 
-An honest note, because many voice packages advertise this: **this release has no voice commands that move the mouse pointer** (no "mouse up", no grid overlay for pointer positioning). What WheelHouse offers instead usually covers the need: clicking controls by saying their name or number (Voice Element Clicking, the next section) is faster and more precise than steering a pointer by voice, and volume and screen brightness ride the physical mouse thumb wheel in dedicated screen-edge zones (pointer at the left edge for brightness, elsewhere for volume) -- a deliberate design choice for people who keep one hand on a mouse or trackball. If you need full pointer-by-voice control, WheelHouse is not that tool yet: pair it with your preferred pointer solution and let WheelHouse handle dictation, commands, and clicking by name.
+To be clear, because many voice packages advertise this: **this release has no voice commands that move the mouse pointer** (no "mouse up", no grid overlay for pointer positioning). What WheelHouse offers instead usually covers the need: clicking controls by saying their name or number (Voice Element Clicking, the next section) is faster and more precise than steering a pointer by voice, and volume and screen brightness sit on the thumb wheel of a Logitech MX-series mouse (see Plugins) -- a deliberate choice for people who keep one hand on a mouse or trackball. If you need full pointer-by-voice control, pair WheelHouse with your preferred pointer solution and let it handle dictation, commands, and clicking by name.
 
 #### Voice Element Clicking
 
@@ -621,7 +621,7 @@ Things worth knowing about the overlay: the numbers **stay on screen** until you
 
 **What you see for each outcome**
 
-A successful click shows no notice -- the control is simply clicked. Failures show a brief advisory notice near the tray so you know why nothing happened: **not found** ("No match for [name]" -- nothing matched; try the numbered overlay), **ambiguous** (the numbered overlay opens on the finalists so you can pick by number; the "Found [A] and [B] -- be more specific" notice appears only when the overlay cannot open), and **could not complete the click** (the wording names the reason -- the control is disabled, the click timed out, or the overlay went stale and needs reapplying). Notices are rate-limited, so a burst of failed attempts will not bury your screen in messages.
+A successful click shows no notice -- the control is clicked. Failures show a brief advisory notice near the tray so you know why nothing happened: **not found** ("No match for [name]" -- nothing matched; try the numbered overlay), **ambiguous** (the numbered overlay opens on the finalists so you can pick by number; the "Found [A] and [B] -- be more specific" notice appears only when the overlay cannot open), and **could not complete the click** (the wording names the reason -- the control is disabled, the click timed out, or the overlay went stale and needs reapplying). Notices are rate-limited, so a burst of failed attempts will not bury your screen in messages.
 
 #### WheelHouse Control
 
@@ -653,7 +653,7 @@ Say "literal" followed by whatever you want to type, and WheelHouse inserts thos
 
 When the speech recognizer keeps mishearing a specific word -- usually a name, a product, a place, or a technical term -- select the problem word anywhere on screen (highlight it with the mouse or say "select word") and say **"x-ray boost"**. WheelHouse copies the selection and sends it to your speech engine as a new recognition hint, saved to a shared hints file on disk so it **persists across restarts** -- you only need to boost each tricky word once. Hints are capped at 100 characters, so boost individual words or short phrases, not whole sentences.
 
-One important honesty note: **saving a hint and applying it are two different things.** **Parakeet (the default engine) saves the hint but does NOT apply it out of the box**: hint biasing ships turned off because applying hints slows recognition by roughly 25 percent per utterance in the project's measurements. To make Parakeet actually use your saved hints, set enabled = true under the [hotwords] section of the Parakeet engine's own config file and restart WheelHouse -- accepting the slower recognition. Until you opt in, do not expect boosting to change what Parakeet hears. **Distil-Whisper** and **Google Cloud Speech-to-Text** both apply saved hints out of the box (as decoder biasing terms and speech adaptation phrases, respectively).
+One important distinction: **saving a hint and applying it are two different things.** **Parakeet (the default engine) saves the hint but does NOT apply it out of the box**: hint biasing ships turned off because applying hints slows recognition by roughly 25 percent per utterance in the project's measurements. To make Parakeet actually use your saved hints, set enabled = true under the [hotwords] section of the Parakeet engine's own config file and restart WheelHouse -- accepting the slower recognition. Until you opt in, do not expect boosting to change what Parakeet hears. **Distil-Whisper** and **Google Cloud Speech-to-Text** both apply saved hints out of the box (as decoder biasing terms and speech adaptation phrases, respectively).
 
 **"x-ray patterns" (the Pattern Manager)**
 
@@ -687,7 +687,7 @@ The position of a word in your phrase is what tells WheelHouse what you meant:
 
 ### The hotword safety gate
 
-Some commands could do real damage if they fired by accident while you were dictating -- closing a window, for example. Those commands are protected by a safety word: they only run when you say "x-ray" first, as in "x-ray close window". Everyday low-risk commands do not need it. And the hotword follows the same position rule as everything else: "x-ray" only has its special meaning as the very first word of a phrase. Mention x-ray machines in the middle of a sentence and the word is simply typed. If you say "x-ray" and what follows is not actually a command, the whole phrase (including "x-ray") is typed as text -- again, no words are ever lost.
+Some commands could do real damage if they fired by accident while you were dictating -- closing a window, for example. Those commands are protected by a safety word: they only run when you say "x-ray" first, as in "x-ray close window". Everyday low-risk commands do not need it. And the hotword follows the same position rule as everything else: "x-ray" only has its special meaning as the very first word of a phrase. Mention x-ray machines in the middle of a sentence and the word is typed. If you say "x-ray" and what follows is not actually a command, the whole phrase (including "x-ray") is typed as text -- again, no words are ever lost.
 
 ### Words appear as you speak
 
@@ -867,7 +867,7 @@ If WheelHouse feels laggy or unreliable on an older computer, these specific cha
 2. **Give yourself more speaking time.** Raise REPLACEMENT_TIMEOUT_MS and COMMAND_TIMEOUT_MS from 700 to 900-1000, and COMMAND_COMPLETION_WAIT_MS from 1000 to 1500 if quick back-to-back commands collide.
 3. **Slow down text insertion.** Under [ui_actions.timing], raise post_paste_delay_ms (30 to 60), clipboard_operation_delay_ms (50 to 100), and clipboard_verification_timeout_ms (250 to 500) if dictated text arrives incomplete or garbled.
 4. **Give voice clicking more time.** Under [click], raise response_timeout_ms (3000 to 5000) and walk_deadline_ms (2500 to 4000) if clicks time out in complex windows.
-5. **Be patient with a local AI server.** Raise [ai.server] timeout_s from 30 to 60 if corrections time out -- or simply leave AI off; nothing else depends on it.
+5. **Be patient with a local AI server.** Raise [ai.server] timeout_s from 30 to 60 if corrections time out -- or leave AI off; nothing else depends on it.
 
 ### Speech Recognition Quality Tweaks
 
@@ -877,9 +877,9 @@ If WheelHouse feels laggy or unreliable on an older computer, these specific cha
 
 ## Plugins
 
-Plugins are optional add-ons that connect WheelHouse to extra hardware and services: your laptop screen, Sonos speakers, a Sony TV, and a few Windows features. Every plugin has its own `[plugins.*]` section in config.toml with an `enabled` switch, so you can turn each one on or off without deleting anything. You do not need any of them for dictation and voice commands to work, and a plugin whose hardware is missing or offline never breaks WheelHouse -- it simply sits quietly and keeps retrying in the background.
+Plugins are optional add-ons that connect WheelHouse to extra hardware and services: your laptop screen, Sonos speakers, a Sony TV, and a few Windows features. Every plugin has its own `[plugins.*]` section in config.toml with an `enabled` switch, so you can turn each one on or off without deleting anything. You do not need any of them for dictation and voice commands to work, and a plugin whose hardware is missing or offline never breaks WheelHouse -- it sits quietly and keeps retrying in the background.
 
-Two of these plugins respond to the mouse thumb wheel using screen "scroll zones": with the pointer on the left side of the screen, the wheel adjusts brightness; anywhere else, it adjusts volume.
+Two of these plugins respond to the mouse thumb wheel -- the small horizontal wheel on the side of the mouse, under your thumb. This is not the main scroll wheel: that one keeps its normal scrolling job. WheelHouse reads the thumb wheel directly from the device, which currently works only with Logitech MX-series mice. Screen zones pick what the thumb wheel controls: pointer at the left edge of the screen, it adjusts brightness; anywhere else, volume -- no command or click needed. Step size and zone width are adjustable in the configuration reference.
 
 ### Internal Panel
 
@@ -998,9 +998,9 @@ If all five pass, WheelHouse is working -- any remaining trouble is specific to 
 
 **Commands not recognized**
 
-- *What you see:* You say "undo" and nothing happens, or the word appears as typed text instead.
-- *What is likely wrong:* The speech engine misheard you (for example "undue" instead of "undo"), or you spoke while other audio was playing and the words ran together.
-- *What to try:* Speak a little more deliberately, with a brief pause before the command. If one particular word is misheard over and over, select a correctly spelled copy of it anywhere on screen and say "x-ray boost" to teach the speech engine to expect that word.
+- *What you see:* You say "maximize" and nothing happens, or the word appears as typed text instead.
+- *What is likely wrong:* The speech engine misheard you (for example "maximum" instead of "maximize"), or you spoke while other audio was playing and the words ran together.
+- *What to try:* Speak a little more deliberately, with a brief pause before the command. Do not raise your voice: louder speech makes recognition worse, not better -- normal conversational volume works best. If one particular word is misheard over and over, select a correctly spelled copy of it anywhere on screen and say "x-ray boost" to teach the speech engine to expect that word.
 
 **Command words are typed as text instead of doing anything**
 
