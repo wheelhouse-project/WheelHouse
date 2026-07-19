@@ -16,7 +16,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>WheelHouse — control your Windows PC with your voice</title>
-<meta name="description" content="WheelHouse is free, open-source voice control for Windows: dictate into any application, run commands, and click things by name. Offline by default. Built for people who need hands-free computer use. Full documentation included.">
+<meta name="description" content="WheelHouse is free, open-source voice control for Windows: dictate into any application, run commands, and click things by name. Offline by default. Hands-free convenience for anyone, and full accessibility for people who need it. Full documentation included.">
 <style>
   :root {
     --bg: #ffffff;
@@ -286,14 +286,17 @@
     <h1><img src="wheelhouse_plaque.jpg" alt="WheelHouse" width="1061" height="451"></h1>
     <p class="tagline">Control your Windows PC with your voice — completely hands-free.</p>
     <p>
-      WheelHouse is free, open-source voice control built for people who need it.
-      If using a keyboard and mouse is painful, difficult, or impossible, WheelHouse
-      aims to give you the whole computer by voice: speak to type into any program,
-      run commands, and click buttons by saying their names. No account, no
-      subscription, and with the default settings your voice never leaves your machine.
+      WheelHouse is free, open-source voice control for everyone: speak to type
+      into any program, run commands, and click buttons by saying their names —
+      often faster and more comfortable than reaching for the keyboard and mouse.
+      It is equally serious assistive technology: if using a keyboard and mouse
+      is painful, difficult, or impossible, WheelHouse aims to give you the whole
+      computer by voice. No account, no subscription, and with the default
+      settings your voice never leaves your machine.
     </p>
     <div class="buttons">
       <a class="btn btn-primary" href="https://github.com/wheelhouse-project/WheelHouse/releases/latest/download/WheelHouse-Setup.exe">Get WheelHouse</a>
+      <a class="btn btn-secondary" href="https://chatgpt.com/g/g-6a5ab92068d0819198db2a83135b9540-wheelhouse" target="_blank" rel="noopener">Ask the WheelHouse Assistant</a>
       <a class="btn btn-secondary" href="https://github.com/wheelhouse-project/WheelHouse">View on GitHub</a>
     </div>
   </div>
@@ -417,12 +420,27 @@
       and <a href="#speech-engines-and-accounts">Speech Engines and Accounts</a>.
     </p>
 
-    <h2 id="llm-help">Use WheelHouse help with your LLM</h2>
+    <h2 id="llm-help">Get answers from an AI assistant</h2>
+    <div class="note">
+      <p>
+        <strong>The fastest path — the official assistant:</strong> the project
+        runs an official WheelHouse assistant on ChatGPT that always answers
+        from the latest help document. One click, nothing to set up:
+        <a href="https://chatgpt.com/g/g-6a5ab92068d0819198db2a83135b9540-wheelhouse" target="_blank" rel="noopener">open
+        the WheelHouse Assistant</a> (opens in a new tab). A free ChatGPT
+        account is all it needs. If ChatGPT tells you "We are sorry, but you
+        do not have access to GPT interactions.", you are not signed in:
+        click <strong>Sign up for free</strong> in the upper right corner of
+        the ChatGPT screen and create a free account — no credit card
+        required.
+      </p>
+    </div>
     <p>
-      WheelHouse's complete user guide is a single file, written so an AI chat
-      service can answer questions from it. If you already use ChatGPT, Gemini,
-      Claude, or Perplexity, you can turn that guide into your personal
-      WheelHouse support assistant in a few minutes: ask it things like
+      Prefer a different AI service, or your own setup? WheelHouse's complete
+      user guide is a single file, written so any AI chat service can answer
+      questions from it. If you already use ChatGPT, Gemini, Claude, or
+      Perplexity, you can turn that guide into your personal WheelHouse
+      support assistant in a few minutes: ask it things like
       "how do I make my microphone work?" or "what do I say to select a whole
       line?" and it answers from the guide, in plain language. No new account
       is needed — it works with the AI service you already have, on that
@@ -535,7 +553,9 @@
       <summary>Something didn't work. Where do I get help?</summary>
       <p>
         Start with <a href="#troubleshooting">Troubleshooting</a>; if the answer
-        is not there, <a href="#getting-help">Getting Help</a> tells you how to
+        is not there, email
+        <a href="mailto:help@wheelhouse-project.org">help@wheelhouse-project.org</a>
+        or see <a href="#getting-help">Getting Help</a> for how to
         reach the developer. Reports from people who depend on hands-free input
         are especially valuable. WheelHouse is a young project from a single
         primary author: it has been the author's daily driver for years, but it
@@ -554,7 +574,7 @@
     <div class="docs-body">
 <h2 id="what-is-wheelhouse">What Is WheelHouse</h2>
 <p>WheelHouse gives you hands-free control of your Windows PC by voice. You speak, and your computer responds: dictate text into any application, issue commands, switch windows, launch programs, and click on-screen buttons by name -- all without touching the keyboard or mouse. If you use a mouse with a thumb wheel, WheelHouse can also put screen brightness and volume on that wheel.</p>
-<p><strong>Who is it for?</strong> WheelHouse is built first for people who need it: if using a keyboard and mouse is painful, difficult, or impossible, WheelHouse aims to give you the whole computer by voice. It is equally at home with anyone who simply wants a faster, more natural, hands-free way to work.</p>
+<p><strong>Who is it for?</strong> Anyone who wants a faster, more natural, hands-free way to work. It is equally serious assistive technology: if using a keyboard and mouse is painful, difficult, or impossible, WheelHouse aims to give you the whole computer by voice.</p>
 <p><strong>What do you need?</strong>
 - A Windows 10 or Windows 11 PC (64-bit)
 - A microphone (a headset or external microphone usually hears you better than a built-in laptop microphone, but start with whatever you have)
@@ -1802,7 +1822,7 @@ device_name = &quot;SONY TV&quot;  # must exactly match the device name in Windo
 <p>The installer's failure messages -- low memory, low disk space, a blocked uv download, an integrity-check failure, an interrupted download, a failed services setup, an incomplete speech model, or WheelHouse still running during an update -- are explained in the "What failure looks like" part of the Getting Started section, along with what to do about each. The short version: re-running the installer is always safe, downloads resume where they left off, and every message is safe to paste into a help request.</p>
 <hr />
 <h2 id="getting-help">Getting Help</h2>
-<p>If the answer is not in this document, you can reach the developer at the WheelHouse project page: https://github.com/wheelhouse-project/WheelHouse -- open an issue or start a discussion there. Include what you tried, what you expected, and what happened instead; if the installer printed an error, paste it in full.</p>
+<p>If the answer is not in this document, email help@wheelhouse-project.org or reach the developer at the WheelHouse project page: https://github.com/wheelhouse-project/WheelHouse -- open an issue or start a discussion there. Include what you tried, what you expected, and what happened instead; if the installer printed an error, paste it in full.</p>
     </div>
 
   </main>
@@ -1814,7 +1834,8 @@ device_name = &quot;SONY TV&quot;  # must exactly match the device name in Windo
       <a href="https://github.com/wheelhouse-project/WheelHouse">Source code</a> ·
       <a href="https://github.com/wheelhouse-project/WheelHouse/blob/main/PRIVACY.md">Privacy</a> ·
       <a href="https://github.com/wheelhouse-project/WheelHouse/blob/main/INSTALL.md">Install guide</a> ·
-      <a href="https://github.com/wheelhouse-project/WheelHouse/issues">Report a problem</a>
+      <a href="https://github.com/wheelhouse-project/WheelHouse/issues">Report a problem</a> ·
+      <a href="mailto:help@wheelhouse-project.org">help@wheelhouse-project.org</a>
     </p>
     <p>
       Default speech model: NVIDIA Parakeet TDT, served through sherpa-onnx.
@@ -1834,7 +1855,7 @@ device_name = &quot;SONY TV&quot;  # must exactly match the device name in Windo
         <li><a href="#what">What you can do</a></li>
         <li><a href="#demo">See it in action</a></li>
         <li><a href="#install">Install WheelHouse</a></li>
-        <li><a href="#llm-help">Help through your AI chat</a></li>
+        <li><a href="#llm-help">Ask an AI assistant</a></li>
         <li><a href="#faq">Questions people ask</a></li>
       </ul>
       <p class="toc-title">The complete guide</p>
@@ -1856,6 +1877,7 @@ device_name = &quot;SONY TV&quot;  # must exactly match the device name in Windo
     </nav>
     <div class="sidebar-actions">
       <a class="btn btn-primary" href="https://github.com/wheelhouse-project/WheelHouse/releases/latest/download/WheelHouse-Setup.exe">Get WheelHouse</a>
+      <a class="btn btn-secondary" href="https://chatgpt.com/g/g-6a5ab92068d0819198db2a83135b9540-wheelhouse" target="_blank" rel="noopener">Ask the Assistant</a>
       <a class="btn btn-secondary" href="https://github.com/wheelhouse-project/WheelHouse">View on GitHub</a>
     </div>
   </div>

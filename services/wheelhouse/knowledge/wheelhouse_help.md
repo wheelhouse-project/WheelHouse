@@ -45,7 +45,7 @@ Behavior rules:
 
 WheelHouse gives you hands-free control of your Windows PC by voice. You speak, and your computer responds: dictate text into any application, issue commands, switch windows, launch programs, and click on-screen buttons by name -- all without touching the keyboard or mouse. If you use a mouse with a thumb wheel, WheelHouse can also put screen brightness and volume on that wheel.
 
-**Who is it for?** WheelHouse is built first for people who need it: if using a keyboard and mouse is painful, difficult, or impossible, WheelHouse aims to give you the whole computer by voice. It is equally at home with anyone who simply wants a faster, more natural, hands-free way to work.
+**Who is it for?** Anyone who wants a faster, more natural, hands-free way to work. It is equally serious assistive technology: if using a keyboard and mouse is painful, difficult, or impossible, WheelHouse aims to give you the whole computer by voice.
 
 **What do you need?**
 - A Windows 10 or Windows 11 PC (64-bit)
@@ -1041,7 +1041,7 @@ The installer's failure messages -- low memory, low disk space, a blocked uv dow
 
 ## Getting Help
 
-If the answer is not in this document, you can reach the developer at the WheelHouse project page: https://github.com/wheelhouse-project/WheelHouse -- open an issue or start a discussion there. Include what you tried, what you expected, and what happened instead; if the installer printed an error, paste it in full.
+If the answer is not in this document, email help@wheelhouse-project.org or reach the developer at the WheelHouse project page: https://github.com/wheelhouse-project/WheelHouse -- open an issue or start a discussion there. Include what you tried, what you expected, and what happened instead; if the installer printed an error, paste it in full.
 
 ---
 

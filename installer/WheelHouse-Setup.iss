@@ -30,7 +30,7 @@ AppId={{A7D3F1E2-4B6C-4E8A-9F1D-2C3B4A5D6E7F}
 AppName=WheelHouse
 AppVersion={#AppVer}
 AppPublisher=WheelHouse Project
-AppPublisherURL=https://wheelhouse-project.github.io/WheelHouse/
+AppPublisherURL=https://wheelhouse-project.org/
 ; The engine owns the real install location. This directory holds only the
 ; engine script and the uninstaller, and is deliberately SEPARATE from the
 ; engine's own %LOCALAPPDATA%\WheelHouse tree so a full uninstall (which removes

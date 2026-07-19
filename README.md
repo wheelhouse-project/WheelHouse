@@ -4,11 +4,13 @@
 
 **Hands-free control of your Windows PC by voice.**
 
-WheelHouse is a voice-control system built for people who need it: if using
-a keyboard and mouse is painful, difficult, or impossible, WheelHouse aims
-to give you the whole computer by voice — commands, dictation into any
-application, and clicking things by name. It runs entirely on your machine
-by default: no cloud account, no subscription, no telemetry.
+WheelHouse is free, open-source voice control for everyone — dictation into
+any application, voice commands, and clicking things by name, often faster
+and more comfortable than reaching for the keyboard and mouse. It is
+equally serious assistive technology: if using a keyboard and mouse is
+painful, difficult, or impossible, WheelHouse aims to give you the whole
+computer by voice. It runs entirely on your machine by default: no cloud
+account, no subscription, no telemetry.
 
 ## What it does
 
@@ -46,13 +48,14 @@ troubleshooting, and uninstall instructions are in [INSTALL.md](./INSTALL.md).
 disk space for the speech model. See INSTALL.md for the exact hardware
 guidance.
 
-**A note on security warnings:** WheelHouse is currently unsigned — there
-is no code-signing certificate yet — so Windows SmartScreen or your
-antivirus may warn you the first time you run it. The warnings are about
-the missing signature, not about what the software does; the entire source
-code is in this repository, and INSTALL.md explains each warning and how to
-proceed. If that trade-off is not acceptable to you, you can read the code
-and install from source instead (see CONTRIBUTING.md).
+**A note on security warnings:** WheelHouse releases are digitally signed;
+the installer's publisher shows as **David Chesley Hite III**, the project
+author. Windows SmartScreen may still warn for a while after each new
+release, until it has seen that exact file often enough — click **More
+info**, check the publisher name, then click **Run anyway**. INSTALL.md
+explains each warning, and the entire source code is in this repository if
+you would rather read the code and install from source (see
+CONTRIBUTING.md).
 
 ## Speech engines
 
@@ -93,18 +96,25 @@ include passwords and medical text. The short version:
 
 ## WheelHouse help in your AI chat
 
-The user help is written so an AI chat service can answer questions from
-it. If you already use ChatGPT, Gemini, Claude, or Perplexity, you can
-turn the help document into a personal WheelHouse support assistant: you
-need only one file — the
+The fastest path is the official
+[WheelHouse Assistant on ChatGPT](https://chatgpt.com/g/g-6a5ab92068d0819198db2a83135b9540-wheelhouse),
+which always answers from the latest help document. A free ChatGPT account
+is enough — if ChatGPT says you "do not have access to GPT interactions",
+click **Sign up for free** in the upper right corner (no credit card
+required).
+
+Prefer your own AI service? The user help is written so any AI chat
+service can answer questions from it. If you already use ChatGPT, Gemini,
+Claude, or Perplexity, you can turn the help document into a personal
+WheelHouse support assistant: you need only one file — the
 [help document](./services/wheelhouse/knowledge/wheelhouse_help.md) to
 upload. Its assistant rules are embedded at the top, so there is nothing
 to paste. The [llm/ folder](./llm/README.md) explains the setup, and the
 steps for each service live on the project site:
-[ChatGPT](https://wheelhouse-project.github.io/WheelHouse/#llm-chatgpt) ·
-[Gemini](https://wheelhouse-project.github.io/WheelHouse/#llm-gemini) ·
-[Claude](https://wheelhouse-project.github.io/WheelHouse/#llm-claude) ·
-[Perplexity](https://wheelhouse-project.github.io/WheelHouse/#llm-perplexity).
+[ChatGPT](https://wheelhouse-project.org/#llm-chatgpt) ·
+[Gemini](https://wheelhouse-project.org/#llm-gemini) ·
+[Claude](https://wheelhouse-project.org/#llm-claude) ·
+[Perplexity](https://wheelhouse-project.org/#llm-perplexity).
 
 ## Project status
 
@@ -115,6 +125,9 @@ machines, so expect rough edges on hardware and applications it has not
 met yet. Bug reports are genuinely welcome, especially from users who
 depend on hands-free input: if WheelHouse fails you, that is exactly the
 report the project needs.
+
+Questions, or stuck on something? Email
+<help@wheelhouse-project.org> or open a GitHub issue.
 
 ## Acknowledgements
 

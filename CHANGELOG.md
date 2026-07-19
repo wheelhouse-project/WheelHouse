@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.3] - 2026-07-18
 
+> Update (2026-07-18): the `WheelHouse-Setup.exe` asset on this release
+> was rebuilt and digitally signed (publisher: David Chesley Hite III)
+> after publication. All releases from here on are signed.
+
 ### Added
 
 - The project website now carries a full documentation page rendered
@@ -75,9 +79,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Graphical installer: `WheelHouse-Setup.exe`, a click-through setup wizard
   that runs the PowerShell installer for you. Built and attached to each
-  release automatically. The download is unsigned in this release, so
-  Windows SmartScreen shows a warning; see INSTALL.md for the
-  "More info" / "Run anyway" steps.
+  release automatically. The download was unsigned in this release
+  (releases are now digitally signed), so Windows SmartScreen showed a
+  warning; see INSTALL.md for the "More info" / "Run anyway" steps.
 - Installer AI setup step: choose whether to enable the AI text-correction
   and help features and which server they use. The installer writes the
   server settings into `config.toml` and stores the API key in your user

@@ -10,7 +10,8 @@ medical text. Security and privacy reports are treated as high priority.
 
 Report it privately through GitHub's vulnerability reporting on this
 repository: **Security → Report a vulnerability** (or
-`https://github.com/wheelhouse-project/WheelHouse/security/advisories/new`). You will
+`https://github.com/wheelhouse-project/WheelHouse/security/advisories/new`),
+or by email to <security@wheelhouse-project.org>. You will
 get a response from the maintainer, normally within a week.
 
 Include what you can:
@@ -49,8 +50,9 @@ Known boundaries, documented rather than reportable:
   commands. There is no speaker authentication in v1; do not point
   WheelHouse at a machine whose compromise-by-voice would be a security
   boundary violation for you.
-- WheelHouse runs unsigned in v1; SmartScreen/antivirus warnings at
-  install time are expected and documented in INSTALL.md.
+- Release installers are digitally signed (publisher: David Chesley
+  Hite III). SmartScreen may still warn shortly after each new release
+  until the file accrues reputation; documented in INSTALL.md.
 
 ## Supported versions
 

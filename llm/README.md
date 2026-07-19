@@ -1,9 +1,17 @@
 # WheelHouse help for your LLM
 
-WheelHouse's complete user guide is written so an AI chat service can answer
-questions from it. Load it into the LLM you already use — ChatGPT, Gemini,
-Claude, or Perplexity — and you get a personal WheelHouse support assistant
-that explains commands and settings in plain language.
+The fastest path is the official
+[WheelHouse Assistant on ChatGPT](https://chatgpt.com/g/g-6a5ab92068d0819198db2a83135b9540-wheelhouse)
+— one click, nothing to set up, and it always answers from the latest
+help document. A free ChatGPT account is enough; if ChatGPT says you "do
+not have access to GPT interactions", click **Sign up for free** in the
+upper right corner (no credit card required).
+
+Prefer your own setup? WheelHouse's complete user guide is written so an
+AI chat service can answer questions from it. Load it into the LLM you
+already use — ChatGPT, Gemini, Claude, or Perplexity — and you get a
+personal WheelHouse support assistant that explains commands and settings
+in plain language.
 
 ## The one file you need
 
@@ -22,10 +30,10 @@ text.
 The step-by-step setup guides live on the WheelHouse site, one section per
 service:
 
-- [ChatGPT — use a Project](https://wheelhouse-project.github.io/WheelHouse/#llm-chatgpt)
-- [Google Gemini — create a Gem](https://wheelhouse-project.github.io/WheelHouse/#llm-gemini)
-- [Claude — use a Project](https://wheelhouse-project.github.io/WheelHouse/#llm-claude)
-- [Perplexity — use a Project](https://wheelhouse-project.github.io/WheelHouse/#llm-perplexity)
+- [ChatGPT — use a Project](https://wheelhouse-project.org/#llm-chatgpt)
+- [Google Gemini — create a Gem](https://wheelhouse-project.org/#llm-gemini)
+- [Claude — use a Project](https://wheelhouse-project.org/#llm-claude)
+- [Perplexity — use a Project](https://wheelhouse-project.org/#llm-perplexity)
 
 All four work on the service's free plan, with one caveat: Perplexity
 documents file uploads inside a project only for its paid plans.
