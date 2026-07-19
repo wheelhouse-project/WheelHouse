@@ -4,7 +4,13 @@
      from the help document and writes public/site/index.html. Edit THIS
      file for layout/pitch changes, the help document for factual content,
      then re-run the renderer; tests/test_docs_page.py keeps the output in
-     sync. -->
+     sync. NOTE: the renderer's audit bans CSS comments, so layout notes
+     live here. Page layout (2026-07-18): one grid wraps the WHOLE page --
+     the sidebar is the left column, full page height from the very top,
+     with the hero, main content, and footer in the right column. On narrow
+     screens the grid collapses to one column and the sidebar (the table of
+     contents) follows the content, because a full-page menu before the
+     pitch would be worse on a phone. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -78,6 +84,7 @@
     width: 100%;
     height: auto;
     border-radius: 10px;
+    margin: 0 auto;
   }
   .tagline {
     font-size: 1.3rem;
@@ -113,31 +120,32 @@
     color: var(--accent);
     border: 2px solid var(--accent);
   }
-  .layout {
-    display: block;
-    max-width: 46rem;
-    margin: 0 auto;
-    padding: 0 1.25rem;
+  .layout { display: block; }
+  .content { min-width: 0; }
+  .sidebar {
+    padding: 1.5rem 1.25rem 1rem;
+    font-size: 0.95rem;
   }
   @media (min-width: 64rem) {
     .layout {
       display: grid;
-      grid-template-columns: 17rem minmax(0, 46rem);
-      gap: 2.75rem;
-      max-width: 68rem;
-      align-items: start;
+      grid-template-columns: 18rem minmax(0, 1fr);
     }
     .sidebar {
+      grid-column: 1;
+      grid-row: 1;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      min-height: 100vh;
+      padding: 1rem 1rem 1.5rem;
+    }
+    .sidebar-inner {
       position: sticky;
       top: 1rem;
       max-height: calc(100vh - 2rem);
       overflow-y: auto;
-      padding-right: 0.5rem;
     }
-  }
-  .sidebar {
-    padding-top: 1.5rem;
-    font-size: 0.95rem;
+    .content { grid-column: 2; grid-row: 1; }
   }
   .toc-title {
     font-weight: 700;
@@ -171,7 +179,12 @@
     padding: 0.7rem 1rem;
     font-size: 1rem;
   }
-  main { min-width: 0; }
+  main {
+    min-width: 0;
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+  }
   ul.features { list-style: none; padding: 0; margin: 1rem 0; }
   ul.features > li {
     background: var(--card);
@@ -209,6 +222,15 @@
     border-radius: 0 10px 10px 0;
     padding: 0.9rem 1.25rem;
     margin: 1.25rem 0;
+  }
+  .note img {
+    display: block;
+    max-width: 24rem;
+    width: 100%;
+    height: auto;
+    margin: 0.9rem auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
   }
   table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
   .table-scroll, main { overflow-wrap: break-word; }
@@ -255,6 +277,10 @@
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
 
+<div class="layout">
+
+<div class="content">
+
 <header class="hero">
   <div class="wrap">
     <h1><img src="wheelhouse_plaque.jpg" alt="WheelHouse" width="1061" height="451"></h1>
@@ -267,46 +293,11 @@
       subscription, and with the default settings your voice never leaves your machine.
     </p>
     <div class="buttons">
-      <a class="btn btn-primary" href="#install">Get WheelHouse</a>
+      <a class="btn btn-primary" href="https://github.com/wheelhouse-project/WheelHouse/releases/latest/download/WheelHouse-Setup.exe">Get WheelHouse</a>
       <a class="btn btn-secondary" href="https://github.com/wheelhouse-project/WheelHouse">View on GitHub</a>
     </div>
   </div>
 </header>
-
-<div class="layout">
-
-  <div class="sidebar">
-    <nav aria-label="Contents">
-      <p class="toc-title">On this page</p>
-      <ul>
-        <li><a href="#what">What you can do</a></li>
-        <li><a href="#demo">See it in action</a></li>
-        <li><a href="#install">Install WheelHouse</a></li>
-        <li><a href="#llm-help">Help through your AI chat</a></li>
-        <li><a href="#faq">Questions people ask</a></li>
-      </ul>
-      <p class="toc-title">The complete guide</p>
-      <ul>
-  <li><a href="#what-is-wheelhouse">What Is WheelHouse</a></li>
-  <li><a href="#day-1-quick-start">Day 1 Quick Start</a></li>
-  <li><a href="#pick-your-path">Pick Your Path</a></li>
-  <li><a href="#getting-started-full-version">Getting Started (Full Version)</a></li>
-  <li><a href="#speech-engines-and-accounts">Speech Engines and Accounts</a></li>
-  <li><a href="#can-my-computer-handle-wheelhouse">Can My Computer Handle WheelHouse?</a></li>
-  <li><a href="#voice-commands">Voice Commands</a></li>
-  <li><a href="#speech-modes">Speech Modes</a></li>
-  <li><a href="#interaction-modes-toggle-vs-push-to-talk">Interaction Modes: Toggle vs Push-to-Talk</a></li>
-  <li><a href="#configuration">Configuration</a></li>
-  <li><a href="#plugins">Plugins</a></li>
-  <li><a href="#troubleshooting">Troubleshooting</a></li>
-  <li><a href="#getting-help">Getting Help</a></li>
-</ul>
-    </nav>
-    <div class="sidebar-actions">
-      <a class="btn btn-primary" href="#install">Get WheelHouse</a>
-      <a class="btn btn-secondary" href="https://github.com/wheelhouse-project/WheelHouse">View on GitHub</a>
-    </div>
-  </div>
 
   <main id="main">
 
@@ -378,15 +369,17 @@
 </ul>
     <ol class="steps">
       <li>
-        <strong>Open PowerShell.</strong> Press the Start button, type
-        <code>powershell</code>, and press Enter. A window with a text prompt opens.
+        <strong>Download the installer.</strong> Click
+        <a href="https://github.com/wheelhouse-project/WheelHouse/releases/latest/download/WheelHouse-Setup.exe">Get
+        WheelHouse</a> (the same button as at the top of this page) to download
+        <code>WheelHouse-Setup.exe</code>.
       </li>
       <li>
-        <strong>Paste this command and press Enter:</strong>
-<pre><code>irm https://github.com/wheelhouse-project/WheelHouse/releases/latest/download/install-wheelhouse.ps1 | iex</code></pre>
-        The installer checks your hardware, sets up its own private Python environment
-        (it installs nothing system-wide), downloads the offline speech model, and adds
-        WheelHouse to your Start menu.
+        <strong>Run it and answer a few questions.</strong> The installer checks
+        your hardware, sets up its own private Python environment (it installs
+        nothing system-wide), downloads the offline speech model, and adds
+        WheelHouse to your Start menu. Plan for 10 to 20 minutes; it needs an
+        internet connection.
       </li>
       <li>
         <strong>Start WheelHouse</strong> from the Start menu and start talking.
@@ -394,15 +387,28 @@
     </ol>
     <div class="note">
       <p>
-        <strong>About security warnings:</strong> WheelHouse is currently unsigned —
-        the project does not yet have a code-signing certificate — so Windows
-        SmartScreen or your antivirus may warn you the first time. The warning is
-        about the missing signature, not about what the software does: the complete
-        source code is public, and
+        <strong>About security warnings:</strong> the installer is digitally
+        signed, and the publisher shows as <strong>David Chesley Hite III</strong>,
+        the project author. Windows SmartScreen may still show the warning below
+        for a while after each new release, until enough people have downloaded
+        that version. It looks alarming, but it only means Windows has not seen
+        this exact file often enough yet: click <strong>More info</strong>, check
+        the publisher name, then click <strong>Run anyway</strong>.
+      </p>
+      <img src="smartscreen-warning.png" alt="The SmartScreen warning dialog: a blue window titled 'Windows protected your PC' saying Microsoft Defender SmartScreen prevented an unrecognized app from starting, with a More info link and a Don't run button." width="676" height="631">
+      <p>
+        The complete source code is public, and
         <a href="#security-warnings-you-may-see">Security warnings you may see</a>
         below explains each warning and how to proceed.
       </p>
     </div>
+    <p>
+      <strong>Prefer a command line?</strong> The same installer runs from
+      PowerShell with no separate download: press the Start button, type
+      <code>powershell</code>, press Enter, then paste this command and press
+      Enter:
+    </p>
+<pre><code>irm https://github.com/wheelhouse-project/WheelHouse/releases/latest/download/install-wheelhouse.ps1 | iex</code></pre>
     <p>
       Everything else about installing — updating, choosing where speech is
       processed, optional engines, credentials, troubleshooting, and how to
@@ -1800,7 +1806,6 @@ device_name = &quot;SONY TV&quot;  # must exactly match the device name in Windo
     </div>
 
   </main>
-</div>
 
 <footer>
   <div class="wrap">
@@ -1818,5 +1823,44 @@ device_name = &quot;SONY TV&quot;  # must exactly match the device name in Windo
     <p>Generated: 2026-04-07 (regenerated 2026-07-17 from current sources for the v1.0.2 release, wh-help-doc-regen)<br>WheelHouse version: 1.0.3</p>
   </div>
 </footer>
+
+</div>
+
+<div class="sidebar">
+  <div class="sidebar-inner">
+    <nav aria-label="Contents">
+      <p class="toc-title">On this page</p>
+      <ul>
+        <li><a href="#what">What you can do</a></li>
+        <li><a href="#demo">See it in action</a></li>
+        <li><a href="#install">Install WheelHouse</a></li>
+        <li><a href="#llm-help">Help through your AI chat</a></li>
+        <li><a href="#faq">Questions people ask</a></li>
+      </ul>
+      <p class="toc-title">The complete guide</p>
+      <ul>
+  <li><a href="#what-is-wheelhouse">What Is WheelHouse</a></li>
+  <li><a href="#day-1-quick-start">Day 1 Quick Start</a></li>
+  <li><a href="#pick-your-path">Pick Your Path</a></li>
+  <li><a href="#getting-started-full-version">Getting Started (Full Version)</a></li>
+  <li><a href="#speech-engines-and-accounts">Speech Engines and Accounts</a></li>
+  <li><a href="#can-my-computer-handle-wheelhouse">Can My Computer Handle WheelHouse?</a></li>
+  <li><a href="#voice-commands">Voice Commands</a></li>
+  <li><a href="#speech-modes">Speech Modes</a></li>
+  <li><a href="#interaction-modes-toggle-vs-push-to-talk">Interaction Modes: Toggle vs Push-to-Talk</a></li>
+  <li><a href="#configuration">Configuration</a></li>
+  <li><a href="#plugins">Plugins</a></li>
+  <li><a href="#troubleshooting">Troubleshooting</a></li>
+  <li><a href="#getting-help">Getting Help</a></li>
+</ul>
+    </nav>
+    <div class="sidebar-actions">
+      <a class="btn btn-primary" href="https://github.com/wheelhouse-project/WheelHouse/releases/latest/download/WheelHouse-Setup.exe">Get WheelHouse</a>
+      <a class="btn btn-secondary" href="https://github.com/wheelhouse-project/WheelHouse">View on GitHub</a>
+    </div>
+  </div>
+</div>
+
+</div>
 </body>
 </html>
